@@ -3,8 +3,12 @@ import logging
 import threading
 import time
 import numpy as np
+import os
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
+
+# Aggressively silence OpenCV C++ internal warnings
+os.environ["OPENCV_LOG_LEVEL"] = "SILENT"
 
 @dataclass
 class DetectionResult:
@@ -25,7 +29,7 @@ class VisionDetector:
         self.is_initialized = False
         self.camera_available = True
         self.reconnect_attempts = 0
-        self.max_reconnect_attempts = 3
+        self.max_reconnect_attempts = 1 # Fail fast on VMs
 
     def initialize(self):
         with self._lock:
@@ -47,33 +51,36 @@ class VisionDetector:
 
     def _open_camera(self):
         if self.reconnect_attempts >= self.max_reconnect_attempts:
-            self.logger.warning("Vision Engine: Max reconnect attempts reached. Switching to Offline Mode.")
+            if self.camera_available: # Only log this once
+                self.logger.warning("Vision Engine: Hardware camera unavailable. Switching to VM Offline Mode.")
             self.camera_available = False
             return
 
         try:
-            self.logger.info(f"Vision Engine: Opening Camera {self.config['camera_id']}...")
+            self.logger.info(f"Vision Engine: Probing Camera {self.config['camera_id']}...")
             if self.cap is not None:
                 self.cap.release()
             
-            # Suppress OpenCV warnings temporarily
-            # cv2.VideoCapture can be noisy if no camera exists
+            # Disable OpenCV's internal stderr printing for this specific call
+            # which is notorious for spamming cap_v4l.cpp errors
+            old_log_level = cv2.setLogLevel(0) if hasattr(cv2, 'setLogLevel') else None
+            
             self.cap = cv2.VideoCapture(self.config["camera_id"], cv2.CAP_V4L2 if self.config["camera_id"] == 0 else cv2.CAP_ANY)
             
             if not self.cap.isOpened():
-                # Try generic API if V4L2 fails
                 self.cap = cv2.VideoCapture(self.config["camera_id"])
+
+            if hasattr(cv2, 'setLogLevel') and old_log_level is not None:
+                cv2.setLogLevel(old_log_level)
 
             if self.cap.isOpened():
                 self.logger.info("Vision Engine: Camera Connected.")
                 self.camera_available = True
                 self.reconnect_attempts = 0
             else:
-                self.logger.warning("Vision Engine: Failed to open camera.")
                 self.camera_available = False
                 self.reconnect_attempts += 1
         except Exception as e:
-            self.logger.error(f"Camera Open Error: {e}")
             self.camera_available = False
             self.reconnect_attempts += 1
 
