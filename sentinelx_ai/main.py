@@ -3,9 +3,16 @@ import sys
 import time
 import logging
 import traceback
+
+# Fix for torchvision circular import bug in Python 3.14+
+try:
+    import torchvision
+    import torchvision.transforms
+except ImportError:
+    pass
+
 from logic.system_core import SystemCore
 from api.server import run_server
-import generate_cert
 
 # --- EXHAUSTIVE LOGGING CONFIGURATION ---
 # This logs to BOTH the console and a specialized trace file
@@ -33,13 +40,6 @@ def main():
         trace_logger.info("=== SentinelX TRACE START ===")
         trace_logger.info(f"OS: {sys.platform} | Python: {sys.version}")
         
-        # 0. Generate SSL Certs for SpeechRecognition API
-        try:
-            generate_cert.generate_self_signed_cert()
-            trace_logger.info("[INIT] Local SSL certificates verified.")
-        except Exception as e:
-            trace_logger.warning(f"[INIT] Could not generate SSL certs. Voice input may be blocked by browser. Error: {e}")
-        
         # 1. Initialize Core
         trace_logger.info("[INIT] Initializing SystemCore...")
         core = SystemCore()
@@ -49,9 +49,7 @@ def main():
         core.start()
         
         # 3. Run API Server (Blocks main thread)
-        is_https = os.path.exists("cert.pem") and os.path.exists("key.pem")
-        protocol = "https" if is_https else "http"
-        trace_logger.info(f"[INIT] Launching FastAPI Server on {protocol}://localhost:8000")
+        trace_logger.info("[INIT] Launching FastAPI Server on http://localhost:8000")
         run_server(core, host="0.0.0.0", port=8000)
 
     except KeyboardInterrupt:

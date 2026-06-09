@@ -315,3 +315,37 @@ A **Jarvis-like industrial assistant**:
 ---
 
 Build this as production-quality code, not prototype.
+
+---
+
+# 🚀 PROJECT EVOLUTION & TECHNICAL IMPLEMENTATIONS (June 2026 Update)
+
+Following the initial prompt, the SentinelX AI platform underwent a massive architectural overhaul to achieve true offline capability, robust performance in cloud VM (Jupyter) environments, and a highly polished user experience.
+
+### 1. Architectural Shift: Pure Web UI
+*   **Streamlit Deprecation:** The initial requirement dual-hosted Streamlit and FastAPI. To reduce memory footprint, eliminate UI lag, and provide a unified experience, Streamlit was completely removed.
+*   **Unified Dashboard:** The Industrial Dashboard was rebuilt natively in HTML/CSS/JS (`web_ui/dashboard.html` & `dashboard.js`), utilizing `Chart.js` for telemetry and MJPEG streaming for the YOLOv8 vision feed.
+*   **Single Server:** FastAPI (`api/server.py`) now serves the entire application on port `8000`.
+
+### 2. The Move to Browser-Native Speech APIs
+*   **TTS & STT (Speech):** Local AI voice models (SpeechT5 for TTS and Whisper for STT) were removed to reduce resource consumption and improve system stability.
+    *   **Solution:** Reverted to browser-native `window.speechSynthesis` and `window.webkitSpeechRecognition`. This offloads audio processing to the client browser, ensuring the backend remains lightweight and responsive.
+*   **LLM (Intelligence):** Integrated **TinyLlama-1.1B** via `ctransformers` to provide fast, local inference without API keys.
+
+### 3. Synchronization & Hallucination Fixes
+*   **Deterministic Alerts:** To prevent the 1B LLM from hallucinating critical safety data, system alerts (Warning/Danger) are now generated via strict deterministic rules. The LLM is reserved exclusively for answering direct user chat/voice queries.
+*   **Real-Time Data Sync:** The `/speak` and `/chat` endpoints were optimized to capture a fresh system snapshot *milliseconds* before LLM generation, ensuring the spoken temperature matches the dashboard exactly.
+*   **Speech Queue:** Implemented a robust JavaScript `speechQueue` to handle rapid system state changes. When a new alert triggers, the queue is flushed, and any currently playing (stale) audio is instantly cancelled so the new alert takes priority.
+
+### 4. Cloud VM (AMDO) & Jupyter Adaptations
+*   **Jupyter Execution:** Created `SentinelX.ipynb` for 1-click execution in cloud environments.
+*   **Asyncio Conflicts:** Fixed `RuntimeError: asyncio.run() cannot be called from a running event loop` by replacing `uvicorn.run()` with `uvicorn.Server(config).serve()` inside the notebook cell, allowing it to attach to IPython's existing event loop.
+*   **Vision Hardware Fallback:** Cloud VMs lack physical cameras. Modified `VisionDetector` to attempt a connection once, fail fast, and automatically switch to a generated "VISION OFFLINE" placeholder frame. This prevents OpenCV C++ exceptions from spamming the console and crashing the logic loop.
+
+### 5. Stability & Diagnostics
+*   **High-Fidelity Tracing:** Implemented `sentinelx_trace.log` to capture millisecond-precise events across all threads.
+*   **Client Log Piping:** Added a `/log` endpoint to pipe frontend browser `console.log` statements directly into the Python backend terminal for unified debugging.
+*   **Circular Import Fix:** Resolved a severe PyTorch crash (`torchvision.transforms`) caused by multi-threading race conditions during simultaneous YOLOv8 and Hugging Face initializations.
+*   **WinError 10054 Suppression:** Implemented a custom `asyncio.set_exception_handler` to silently ignore the uncatchable `ConnectionResetError` thrown by Windows when a browser drops an MJPEG stream.
+
+**The system is now a production-grade, offline-first, highly animated industrial AI assistant.**

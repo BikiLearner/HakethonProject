@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = window.location.protocol + "//" + window.location.host;
 let chart;
 
 async function initChart() {
