@@ -1,46 +1,73 @@
-# 🤖 SentinelX AI : Industrial Overhaul V4
+# 🤖 SentinelX AI : Industrial Overhaul V4 (Pure Web Edition)
 
 **SentinelX AI** is an advanced, multi-modal industrial safety platform. It represents a paradigm shift from reactive monitoring to **proactive risk mitigation** by fusing real-time physics simulations with high-speed AI inference.
 
 ---
 
-## 🚀 Quick Start (Copy & Run)
+## 🚀 Quick Start (One-Go Setup)
 
-### 1. Environment Setup
-We recommend using Python 3.10+ (Fully stabilized for Python 3.14).
+### 🐳 Docker Deployment (Recommended)
+The easiest way to run the entire system in a single go.
 ```bash
-# Clone the repository
+# Build the container
+docker build -t sentinelx -f docker/Dockerfile .
+
+# Run the container
+docker run -p 8000:8000 sentinelx
+```
+- **Unified Web Interface:** [http://localhost:8000](http://localhost:8000)
+
+### 🐍 Local Setup
+```bash
+# Clone and install
 git clone https://github.com/your-repo/sentinelx_ai.git
 cd sentinelx_ai
-
-# Install high-performance dependencies
 pip install -r requirements.txt
+
+# Start the unified platform
+python main.py
 ```
 
-### 2. Launch the Platform
-```bash
-# Start the asynchronous server and dashboard
-python -m streamlit run main.py
-```
+---
+
+## 🌟 Modern Industrial UI
+
+SentinelX V4 now features a **pure HTML/CSS/JS architecture**, eliminating the need for heavy external dashboarding frameworks.
+
+1.  **Robot Home (Default View):** An animated robotic face that "thinks" using a local LLM and speaks status updates via offline TTS.
+2.  **Industrial Dashboard:** Click **"OPEN DASHBOARD"** to transition to the technical command center.
+
+### 🤖 Robot Behavior
+- **Animated Eyes:** Glow 🟢 Green (Normal), 🟡 Yellow (Warning), or 🔴 Red (Critical).
+- **Voice Engine:** Uses `pyttsx3` for real-time offline speech synthesis.
+- **LLM Reasoning:** Converts raw sensor data into human-friendly explanations.
 
 ---
 
 ## 🏗️ Technical Architecture: The "Threaded Core"
 
-SentinelX AI uses a **Decoupled Asynchronous Architecture**. This design pattern is critical for industrial applications where a UI hang could mask a critical safety alert.
+SentinelX AI uses a **Decoupled Asynchronous Architecture**.
 
 ### 📁 Exhaustive File Breakdown
 
 #### **1. `main.py` | The Application Orchestrator**
-- **Lazy Loading Logic:** On Python 3.14, heavy binary loads (Torch/OpenCV) can crash the Streamlit handshake. `main.py` solves this by starting the UI first and loading AI models in the background.
-- **State Serialization:** Efficiently bridges the gap between the stateless Streamlit UI and the stateful threaded backend using `@st.cache_resource`.
+- Initializes the **SystemCore**.
+- Launches the **FastAPI Bridge** on port 8000.
+- Orchestrates the **Robot Intelligence Loop**.
 
-#### **2. `logic/system_core.py` | Multi-Threaded Engine**
-The heart of the system. It orchestrates three high-frequency parallel threads:
-- **Telemetry Thread (10Hz):** Executes the physics engine equations.
-- **Vision Thread (10 FPS):** Manages the camera buffer and YOLOv8 inference.
-- **Reasoning Thread (2Hz):** Runs the ML Anomaly Detection and Bayesian Fusion.
-- **Safety Interlocks:** Uses `threading.Lock()` to prevent race conditions during sensor data fusion.
+#### **2. `api/server.py` | FastAPI Bridge**
+- Exposes system state, video streams, and history data.
+- Serves all static web files (`index.html`, `dashboard.html`).
+- Handles control commands (Load factors, safety triggers).
+
+#### **3. `web_ui/` | Pure Web Frontend**
+- `index.html`: The interactive Robot face.
+- `dashboard.html`: High-resolution telemetry charts and vision feeds.
+- `app.js` & `dashboard.js`: Real-time state synchronization via REST API.
+
+... (rest of the file)
+
+... (rest of the file)
 
 #### **3. `simulator/machine_simulator.py` | Physics-Coupled Digital Twin**
 This is not a random number generator. It is a **Digital Twin** that follows physical laws:

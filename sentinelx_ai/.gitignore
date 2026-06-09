@@ -48,7 +48,9 @@ env/
 *.pt
 *.onnx
 *.pth
+*.gguf
 yolov8n.pt
+models/
 
 # Logs
 *.log

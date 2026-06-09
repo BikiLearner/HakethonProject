@@ -1,90 +1,67 @@
-"""
-SentinelX AI - Stable Entry Point (V4)
-Lazy loading to preventprocess-level crashes on Python 3.14
-"""
-import streamlit as st
-import time
-import sys
 import os
+import sys
+import time
 import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("SentinelX")
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
+import traceback
 from logic.system_core import SystemCore
-from ui.dashboard import Dashboard
+from api.server import run_server
+import generate_cert
 
-@st.cache_resource
-def get_system_core():
-    """Create core once. Don't load models here."""
-    return SystemCore()
+# --- EXHAUSTIVE LOGGING CONFIGURATION ---
+# This logs to BOTH the console and a specialized trace file
+trace_logger = logging.getLogger("SentinelX.Trace")
+trace_logger.setLevel(logging.DEBUG)
 
-def init_ui_state():
-    """Initialize UI-specific state variables with safe defaults"""
-    if "trigger_warning" not in st.session_state:
-        st.session_state.trigger_warning = False
-    if "trigger_critical" not in st.session_state:
-        st.session_state.trigger_critical = False
-    if "machine_load" not in st.session_state:
-        st.session_state.machine_load = 0.5
-    if "camera_id" not in st.session_state:
-        st.session_state.camera_id = 0
-    if "available_cameras" not in st.session_state:
-        st.session_state.available_cameras = [0, 1, 2]
+log_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(name)-15s | %(levelname)-8s | %(message)s', datefmt='%H:%M:%S')
+
+# Console Handler
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(log_format)
+trace_logger.addHandler(console_handler)
+
+# File Handler (Comprehensive Trace)
+file_handler = logging.FileHandler("sentinelx_trace.log", mode='w')
+file_handler.setFormatter(log_format)
+trace_logger.addHandler(file_handler)
+
+# Redirect root loggers to our trace format
+logging.getLogger("SentinelX").addHandler(file_handler)
+logging.getLogger("uvicorn").addHandler(file_handler)
 
 def main():
     try:
-        # 1. UI Setup
-        init_ui_state()
-        if "dashboard" not in st.session_state:
-            st.session_state.dashboard = Dashboard()
+        trace_logger.info("=== SentinelX TRACE START ===")
+        trace_logger.info(f"OS: {sys.platform} | Python: {sys.version}")
         
-        # 2. Get Core
-        core = get_system_core()
-
-        # 3. Start Threads (Safe/Lazy)
-        if not core.state.is_running:
-            with st.spinner("🔧 Calibrating Industrial Systems..."):
-                core.start()
-                time.sleep(1)
-                st.rerun()
-
-        # 4. Sync UI -> Core
-        core.set_triggers(st.session_state.trigger_warning, st.session_state.trigger_critical)
-        core.set_load(st.session_state.machine_load)
+        # 0. Generate SSL Certs for SpeechRecognition API
+        try:
+            generate_cert.generate_self_signed_cert()
+            trace_logger.info("[INIT] Local SSL certificates verified.")
+        except Exception as e:
+            trace_logger.warning(f"[INIT] Could not generate SSL certs. Voice input may be blocked by browser. Error: {e}")
         
-        # 5. Get Data
-        snapshot = core.get_snapshot()
+        # 1. Initialize Core
+        trace_logger.info("[INIT] Initializing SystemCore...")
+        core = SystemCore()
         
-        # 5. Handle initial loading state
-        if snapshot["machine_state"] is None:
-            st.info("📡 Connecting to machine telemetry...")
-            time.sleep(1)
-            st.rerun()
-            return
+        # 2. Start Logic Threads
+        trace_logger.info("[INIT] Starting background processing threads...")
+        core.start()
+        
+        # 3. Run API Server (Blocks main thread)
+        is_https = os.path.exists("cert.pem") and os.path.exists("key.pem")
+        protocol = "https" if is_https else "http"
+        trace_logger.info(f"[INIT] Launching FastAPI Server on {protocol}://localhost:8000")
+        run_server(core, host="0.0.0.0", port=8000)
 
-        # 6. Render
-        st.session_state.dashboard.render_dashboard(
-            machine_state=snapshot["machine_state"],
-            detection_result=snapshot["detection_result"],
-            fusion_result=snapshot["fusion_result"],
-            decision=snapshot["decision"],
-            fusion_history=snapshot["fusion_history"],
-            last_frame=snapshot["last_frame"],
-            core=core
-        )
-
-        # 7. Refresh
-        time.sleep(1)
-        st.rerun()
-
+    except KeyboardInterrupt:
+        trace_logger.info("=== System shutdown requested by user ===")
     except Exception as e:
-        st.error(f"### 🛑 System Halted: {e}")
-        if st.button("Restart Engine"):
-            st.cache_resource.clear()
-            st.rerun()
+        trace_logger.critical(f"!!! FATAL CRASH !!! Error: {e}")
+        trace_logger.error(traceback.format_exc())
+    finally:
+        trace_logger.info("=== SentinelX TRACE END ===")
+        time.sleep(2)
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentinelX AI - Proactive Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="container">
+        <div class="glass-panel main-header">
+            <h1 class="title">SENTINELX <span class="accent">AI</span></h1>
+            <div id="status-badge" class="badge green">SYSTEM NOMINAL</div>
+        </div>
+
+        <div class="robot-stage">
+            <div class="robot-container">
+                <div class="robot-face">
+                    <div class="eyes">
+                        <div class="eye left" id="eye-left">
+                            <div class="pupil"></div>
+                        </div>
+                        <div class="eye right" id="eye-right">
+                            <div class="pupil"></div>
+                        </div>
+                    </div>
+                    <div class="cheeks">
+                        <div class="cheek left"></div>
+                        <div class="cheek right"></div>
+                    </div>
+                    <div class="mouth" id="mouth"></div>
+                </div>
+                <div class="glow" id="glow"></div>
+                <div class="rings">
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                </div>
+            </div>
+            
+            <div class="speech-bubble-container">
+                <div class="speech-bubble" id="speech-bubble">
+                    Hello! I am SentinelX. I'm monitoring your systems.
+                </div>
+            </div>
+        </div>
+
+        <div class="interaction-zone">
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Ask me something...">
+                <button id="btn-send" class="icon-btn"><span class="material-icons">send</span></button>
+                <button id="btn-listen" class="icon-btn mic-btn"><span class="material-icons">mic</span></button>
+            </div>
+            <div id="listening-indicator" class="hidden">Listening...</div>
+        </div>
+
+        <div class="bottom-controls">
+            <div class="mini-metrics">
+                <div class="mini-metric">
+                    <span class="m-label">RISK</span>
+                    <span id="risk-value" class="m-val">0%</span>
+                </div>
+                <div class="mini-metric">
+                    <span class="m-label">TEMP</span>
+                    <span id="temp-value" class="m-val">0°C</span>
+                </div>
+            </div>
+            <button onclick="openDashboard()" class="btn-dashboard">
+                <span>ENTER COMMAND CENTER</span>
+                <div class="btn-glow"></div>
+            </button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

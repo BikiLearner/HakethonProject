@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentinelX AI - Command Center</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body">
+    <header class="dashboard-header">
+        <div class="logo">
+            <span class="material-icons">precision_manufacturing</span>
+            SENTINELX <span class="accent">AI</span>
+        </div>
+        <div class="header-center">
+            <!-- Mini Robot -->
+            <div class="mini-robot" id="mini-robot" onclick="location.href='/'">
+                <div class="mini-robot-face">
+                    <div class="mini-eyes">
+                        <div class="mini-eye left" id="mini-eye-left"></div>
+                        <div class="mini-eye right" id="mini-eye-right"></div>
+                    </div>
+                    <div class="mini-mouth" id="mini-mouth"></div>
+                </div>
+            </div>
+            <div class="mini-speech-bubble" id="mini-speech-bubble" style="opacity: 0;">Monitoring...</div>
+        </div>
+        <div class="header-info">
+            <div class="pulse-indicator"></div>
+            <span class="uptime">CORE SYSTEM ACTIVE</span>
+            <button onclick="location.href='/'" class="btn-back">
+                <span class="material-icons">smart_toy</span> BACK TO ASSISTANT
+            </button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Status Row -->
+        <div class="status-grid">
+            <div class="status-panel card">
+                <div class="card-header">
+                    <h3><span class="material-icons">analytics</span> SYSTEM HEALTH</h3>
+                    <div id="status-display" class="status-indicator">
+                        <h1 id="status-text">INITIALIZING</h1>
+                    </div>
+                </div>
+                <div class="alerts">
+                    <div id="alert-box" class="alert-box info">
+                        <p class="alert-label">RECOMMENDED ACTION</p>
+                        <p id="action-text">SYSTEM CALIBRATING</p>
+                    </div>
+                    <div class="diagnostic-info">
+                        <p><strong>ISSUE:</strong> <span id="issue-text">Scanning...</span></p>
+                        <p><strong>REASON:</strong> <span id="reason-text">Collecting sensor data</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vision-panel card">
+                <div class="card-header">
+                    <h3><span class="material-icons">videocam</span> LIVE SAFETY FEED</h3>
+                    <span class="live-tag">LIVE</span>
+                </div>
+                <div class="video-container">
+                    <!-- Added timestamp to avoid caching -->
+                    <img src="/video_feed" alt="Vision Feed" id="vision-feed">
+                    <div class="vision-overlay">
+                        <div class="corner tl"></div><div class="corner tr"></div>
+                        <div class="corner bl"></div><div class="corner br"></div>
+                        <div class="scanline"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-row">
+            <div class="metric-card card">
+                <div class="m-icon"><span class="material-icons">thermostat</span></div>
+                <div class="m-data">
+                    <span class="m-label">TEMPERATURE</span>
+                    <span id="m-temp" class="m-value">0.0°C</span>
+                </div>
+            </div>
+            <div class="metric-card card">
+                <div class="m-icon"><span class="material-icons">vibration</span></div>
+                <div class="m-data">
+                    <span class="m-label">VIBRATION</span>
+                    <span id="m-vib" class="m-value">0.00</span>
+                </div>
+            </div>
+            <div class="metric-card card">
+                <div class="m-icon"><span class="material-icons">settings_backup_restore</span></div>
+                <div class="m-data">
+                    <span class="m-label">RPM</span>
+                    <span id="m-rpm" class="m-value">0</span>
+                </div>
+            </div>
+            <div class="metric-card card">
+                <div class="m-icon"><span class="material-icons">psychology</span></div>
+                <div class="m-data">
+                    <span class="m-label">ML ANOMALY</span>
+                    <span id="m-anomaly" class="m-value">0%</span>
+                </div>
+            </div>
+            <div class="metric-card card">
+                <div class="m-icon"><span class="material-icons">history</span></div>
+                <div class="m-data">
+                    <span class="m-label">COMPONENT WEAR</span>
+                    <span id="m-wear" class="m-value">0.00%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Row -->
+        <div class="analysis-grid">
+            <div class="chart-panel card">
+                <div class="card-header">
+                    <h3><span class="material-icons">show_chart</span> TELEMETRY TRENDS</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="control-panel card">
+                <div class="card-header">
+                    <h3><span class="material-icons">tune</span> ENGINE CONTROL</h3>
+                </div>
+                <div class="control-body">
+                    <div class="load-control">
+                        <div class="load-header">
+                            <label>MACHINE LOAD</label>
+                            <span id="load-value">50%</span>
+                        </div>
+                        <input type="range" id="load-slider" min="0" max="1" step="0.1" value="0.5">
+                    </div>
+                    <div class="button-group">
+                        <button onclick="trigger('critical')" class="btn-danger">
+                            <span class="material-icons">report</span> CRITICAL OVERRIDE
+                        </button>
+                        <button onclick="trigger('warning')" class="btn-warning">
+                            <span class="material-icons">warning</span> SIMULATE WARNING
+                        </button>
+                        <button onclick="trigger('reset')" class="btn-reset">
+                            <span class="material-icons">restart_alt</span> FACTORY RESET
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

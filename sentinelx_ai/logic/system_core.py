@@ -107,6 +107,9 @@ class SystemCore:
                         
                         self.state.decision = self.reasoning_engine.analyze(fused.to_dict())
                         self.state.last_update_time = time.time()
+                        
+                        # High-fidelity trace log
+                        logger.debug(f"[CORE LOOP] Fused State -> Temp: {self.state.machine_state.temperature:.2f}, Status: {self.state.decision.status}")
             except Exception as e:
                 logger.error(f"Logic error: {e}")
             time.sleep(0.5)
