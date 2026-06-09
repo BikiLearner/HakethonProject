@@ -2,6 +2,7 @@ import cv2
 import logging
 import threading
 import time
+import numpy as np
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 
@@ -22,6 +23,9 @@ class VisionDetector:
         self.use_cpu = use_cpu
         self._lock = threading.Lock()
         self.is_initialized = False
+        self.camera_available = True
+        self.reconnect_attempts = 0
+        self.max_reconnect_attempts = 3
 
     def initialize(self):
         with self._lock:
@@ -42,29 +46,62 @@ class VisionDetector:
             self.is_initialized = True
 
     def _open_camera(self):
+        if self.reconnect_attempts >= self.max_reconnect_attempts:
+            self.logger.warning("Vision Engine: Max reconnect attempts reached. Switching to Offline Mode.")
+            self.camera_available = False
+            return
+
         try:
             self.logger.info(f"Vision Engine: Opening Camera {self.config['camera_id']}...")
             if self.cap is not None:
                 self.cap.release()
-            self.cap = cv2.VideoCapture(self.config["camera_id"])
+            
+            # Suppress OpenCV warnings temporarily
+            # cv2.VideoCapture can be noisy if no camera exists
+            self.cap = cv2.VideoCapture(self.config["camera_id"], cv2.CAP_V4L2 if self.config["camera_id"] == 0 else cv2.CAP_ANY)
+            
+            if not self.cap.isOpened():
+                # Try generic API if V4L2 fails
+                self.cap = cv2.VideoCapture(self.config["camera_id"])
+
             if self.cap.isOpened():
                 self.logger.info("Vision Engine: Camera Connected.")
+                self.camera_available = True
+                self.reconnect_attempts = 0
             else:
                 self.logger.warning("Vision Engine: Failed to open camera.")
+                self.camera_available = False
+                self.reconnect_attempts += 1
         except Exception as e:
             self.logger.error(f"Camera Open Error: {e}")
+            self.camera_available = False
+            self.reconnect_attempts += 1
+
+    def _get_placeholder_frame(self):
+        # Create a black frame with text indicating no camera
+        frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(frame, "VISION OFFLINE", (150, 240), font, 1.5, (0, 0, 255), 3, cv2.LINE_AA)
+        cv2.putText(frame, "No physical camera detected.", (150, 280), font, 0.7, (255, 255, 255), 1, cv2.LINE_AA)
+        return frame
 
     def detect(self) -> DetectionResult:
-        if not self.is_initialized or self.cap is None:
+        if not self.is_initialized:
             return DetectionResult(False, 0.0, 0, False, None)
 
         with self._lock:
             try:
+                if not self.camera_available or self.cap is None:
+                    # Provide a placeholder and simulate no detection
+                    frame = self._get_placeholder_frame()
+                    time.sleep(0.1) # Simulate camera delay so thread doesn't spin at 100% CPU
+                    return DetectionResult(False, 0.0, 0, False, frame)
+
                 ret, frame = self.cap.read()
                 if not ret or frame is None:
-                    # Attempt one-time reconnection
+                    # Attempt reconnection
                     self._open_camera()
-                    return DetectionResult(False, 0.0, 0, False, None)
+                    return DetectionResult(False, 0.0, 0, False, self._get_placeholder_frame())
 
                 # Process Frame
                 results = self.model.predict(frame, conf=0.5, verbose=False)
@@ -90,7 +127,7 @@ class VisionDetector:
 
             except Exception as e:
                 self.logger.error(f"Detection Loop Error: {e}")
-                return DetectionResult(False, 0.0, 0, False, None)
+                return DetectionResult(False, 0.0, 0, False, self._get_placeholder_frame())
 
     def close(self):
         with self._lock:
