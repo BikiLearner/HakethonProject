@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentinelX AI - Proactive Core</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="industrial-theme">
+    <div class="atmosphere"></div>
+    <div class="scanlines"></div>
+    
+    <div class="ui-wrapper">
+        <!-- Persistent Header -->
+        <header class="glass-header">
+            <div class="system-brand">SENTINELX <span class="v-tag">CORE V5.0</span></div>
+            <div class="machine-status-hub">
+                <div class="status-module">
+                    <span class="s-label">IDENTIFIED UNIT</span>
+                    <span id="active-machine" class="s-value">INITIALIZING...</span>
+                </div>
+                <div class="status-module">
+                    <span class="s-label">OPERATIONAL STATE</span>
+                    <span id="system-status-text" class="s-value">SCANNING</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Central Robot Experience -->
+        <main class="robot-viewport">
+            <div class="robot-head-anchor">
+                <div class="robot-head" id="robot-head">
+                    <div class="head-shell">
+                        <div class="screen-inner">
+                            <!-- LED Matrix Eyes -->
+                            <div class="eye-matrix">
+                                <div class="eye">
+                                    <div class="led-grid" id="eye-l">
+                                        <div class="led-dot"></div><div class="led-dot"></div>
+                                        <div class="led-dot"></div><div class="led-dot"></div>
+                                        <div class="led-dot"></div>
+                                    </div>
+                                </div>
+                                <div class="eye">
+                                    <div class="led-grid" id="eye-r">
+                                        <div class="led-dot"></div><div class="led-dot"></div>
+                                        <div class="led-dot"></div><div class="led-dot"></div>
+                                        <div class="led-dot"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Spectrum Mouth -->
+                            <div class="spectrum-mouth" id="mouth">
+                                <div class="spec-bar"></div><div class="spec-bar"></div>
+                                <div class="spec-bar"></div><div class="spec-bar"></div>
+                                <div class="spec-bar"></div><div class="spec-bar"></div>
+                                <div class="spec-bar"></div><div class="spec-bar"></div>
+                                <div class="spec-bar"></div><div class="spec-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intelligence Speech Panel -->
+            <div class="speech-glass" id="speech-panel">
+                <div id="speech-text">AWAITING SYSTEM DATA STREAM...</div>
+            </div>
+        </main>
+
+        <!-- Dock Navigation -->
+        <nav class="dock-nav">
+            <div class="dock-item active" onclick="location.href='/robot.html'">
+                <span class="material-icons">smart_toy</span>
+                <span>AI CORE</span>
+            </div>
+            <div class="dock-item" onclick="location.href='/index.html'">
+                <span class="material-icons">dashboard</span>
+                <span>COMMAND</span>
+            </div>
+            <div class="dock-item" onclick="location.href='/upload.html'">
+                <span class="material-icons">settings</span>
+                <span>CONFIG</span>
+            </div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

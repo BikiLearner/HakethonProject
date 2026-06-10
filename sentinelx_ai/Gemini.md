@@ -1,46 +1,66 @@
-# 🤖 BUILD INSTRUCTION PROMPT — SentinelX AI Voice Robot + Web UI (Notebook + Docker + Local LLM)
+# 🤖 SentinelX AI V5 — Autonomous Industrial AI with RAG + Voice + Custom Systems
 
-You are a senior AI systems engineer.
+You are a **principal AI systems architect**.
 
-Your task is to EXTEND an existing industrial AI system called **SentinelX AI (Streamlit + Python backend)** into a **multi-interface system** with:
+Your task is to EXTEND SentinelX AI (existing multi-threaded industrial monitoring system) into a **self-configurable, voice-driven industrial intelligence platform**.
 
-1. A **Home Screen (HTML/CSS/JS UI)**
-2. A **Speaking Robot Assistant (with animated face)**
-3. Integration with a **Local LLM (offline)**
-4. Full support for **Docker + Notebook-only environments**
-5. Seamless navigation to existing **Streamlit Dashboard**
+This is NOT a prototype. Build production-grade modular architecture.
 
 ---
 
-# 🎯 CORE OBJECTIVE
+# 🎯 CORE UPGRADE OBJECTIVE
 
-Transform SentinelX from a Streamlit-only dashboard into a **dual-interface system**:
+Transform SentinelX into:
 
-* 🧠 Backend → existing Python multi-threaded system (DO NOT BREAK)
-* 🌐 Frontend → new HTML/CSS UI (runs in notebook environment)
-* 🤖 Robot → voice + animated assistant connected to system state
-* 🐳 Deployment → fully Dockerized and runnable inside Jupyter/Notebook
+### 🧠 A SELF-LEARNING SYSTEM
+
+* Accepts **Excel-based machine specifications**
+* Converts them into **structured knowledge**
+* Stores them in a **local RAG system**
+* Adapts monitoring + reasoning dynamically
+
+### 🤖 A VOICE-FIRST AI AGENT
+
+* NO chat UI
+* Fully conversational (listen + speak)
+* Real-time system awareness
+
+### 🌐 A DYNAMIC UI SYSTEM
+
+* Modern robotic UI (square industrial robot face 🤖)
+* Reacts visually + behaviorally to system state
 
 ---
 
-# 🧱 SYSTEM ARCHITECTURE (MANDATORY)
-
-Follow this structure strictly:
+# 🧱 UPDATED SYSTEM ARCHITECTURE
 
 ```
 sentinelx_ai/
 │
-├── main.py  (existing - DO NOT BREAK)
+├── main.py  (existing - DO NOT MODIFY CORE LOGIC)
+│
 ├── api/
-│   └── server.py  <-- NEW (FastAPI bridge)
+│   └── server.py
+│
+├── rag/
+│   ├── ingestion.py
+│   ├── embedding_store.py
+│   ├── retriever.py
 │
 ├── robot/
 │   ├── voice_engine.py
+│   ├── stt_engine.py
 │   ├── llm_engine.py
+│   ├── conversation_loop.py
 │   ├── state_interpreter.py
+│
+├── custom_system/
+│   ├── excel_parser.py
+│   ├── schema_builder.py
 │
 ├── web_ui/
 │   ├── index.html
+│   ├── upload.html
 │   ├── style.css
 │   ├── app.js
 │
@@ -50,302 +70,308 @@ sentinelx_ai/
 
 ---
 
-# 🌐 FRONTEND REQUIREMENTS (HTML/CSS/JS ONLY)
+# 📊 EXCEL → CUSTOM SYSTEM PIPELINE (CRITICAL FEATURE)
 
-Create a **modern industrial UI homepage**:
+## Upload Page:
 
-## Home Screen:
+Create a new UI page:
 
-* Fullscreen dark UI
-* Center → **Robot Face**
-* Floating button → **"Open Dashboard"**
+### `/upload`
 
-## Robot Face Design:
-
-* Circular robotic face
-* Two animated eyes
-
-### Eye Colors:
-
-* 🟢 Green → Normal
-* 🟡 Yellow → Warning
-* 🔴 Red → Critical
-
-Use smooth CSS animations (glow/pulse effect).
+* Accept `.xlsx`
+* Show preview
+* Button: **"Generate System"**
 
 ---
 
-# 🎤 ROBOT BEHAVIOR (CRITICAL)
+## Processing Pipeline:
 
-The robot must:
+### Step 1: Parse Excel
 
-### 1. Speak System Status
+Use `pandas`
 
-Examples:
+Expected flexible structure:
 
-* "System operating normally"
-* "Warning: Temperature rising"
-* "Critical alert: Machine overheating"
-
-### 2. Speak ONLY on:
-
-* State change
-* Critical anomaly
-* User interaction
-
-### 3. Voice Engine:
-
-Use:
-
-* `pyttsx3` (offline TTS) OR
-* Coqui TTS (preferred if possible)
+* Machine Name
+* Sensors (Temp, Vibration, etc.)
+* Thresholds
+* Safety Rules
+* Environment Data
 
 ---
 
-# 🧠 LOCAL LLM INTEGRATION
-
-Use a **local LLM (NO API CALLS)**:
-
-Preferred:
-
-* Ollama (Mistral / LLaMA3)
-* OR llama-cpp-python
-
-## LLM ROLE:
-
-Convert raw system data → human speech
+### Step 2: Convert to Structured JSON
 
 Example:
 
-Input:
-
 ```
-temperature=92, vibration=3.2, risk=0.87
-```
-
-Output:
-
-```
-"Critical condition detected. Temperature and vibration exceed safe limits."
+{
+  "machine": "Hydraulic Press",
+  "sensors": {
+    "temperature": { "warning": 75, "critical": 90 },
+    "vibration": { "warning": 2.0, "critical": 3.0 }
+  }
+}
 ```
 
 ---
 
-# 🔗 BACKEND INTEGRATION (VERY IMPORTANT)
+### Step 3: RAG Storage (LOCAL ONLY)
 
-DO NOT modify core system threads.
+Use:
 
-Instead:
+* Embedding model:
 
-### Create FastAPI bridge:
+  * sentence-transformers (offline)
+* Vector DB:
 
-`api/server.py`
+  * FAISS (mandatory)
 
-Endpoints:
+Store:
+
+* Machine specs
+* Rules
+* Operational guidelines
+
+---
+
+### Step 4: Dynamic System Override
+
+Your system must:
+
+* Override default thresholds
+* Override reasoning logic inputs
+* Affect:
+
+  * fusion_engine
+  * reasoning_engine
+  * robot speech
+
+Fallback:
+
+* If no custom system → use generic defaults
+
+---
+
+# 🧠 RAG QUERY USAGE
+
+Whenever LLM generates response:
+
+1. Retrieve relevant context from FAISS
+2. Inject into prompt
+
+Example:
+
+```
+Context:
+Machine max temp = 85°C
+
+User:
+"What is current risk?"
+
+LLM:
+Uses both real-time data + retrieved context
+```
+
+---
+
+# 🎤 FULL VOICE LOOP (NO UI CHAT)
+
+## STT (Speech-to-Text)
+
+Use:
+
+* Vosk (offline) OR Whisper.cpp
+
+## TTS (Text-to-Speech)
+
+Use:
+
+* Coqui TTS (preferred)
+* fallback: pyttsx3
+
+---
+
+## Conversation Loop (CRITICAL)
+
+Create continuous loop:
+
+```
+while True:
+    listen → transcribe → process → respond → speak
+```
+
+Trigger conditions:
+
+* User speech
+* System anomaly
+* State change
+
+---
+
+## Behavior Rules
+
+* Interrupt speech if critical alert
+* Debounce repeated alerts
+* Maintain conversational memory (short-term)
+
+---
+
+# 🤖 ROBOT UI (MAJOR UPGRADE)
+
+Replace circular face → **Square Industrial Robot**
+
+## Design:
+
+* Square metallic panel 🤖
+* LED strip eyes (horizontal)
+* Animated expressions:
+
+  * Idle (soft blue)
+  * Thinking (pulsing)
+  * Warning (yellow flicker)
+  * Critical (red flashing)
+
+Add:
+
+* Subtle mechanical animation
+* Glow + reflection (glassmorphism)
+
+---
+
+# 🌐 UI PAGES
+
+## 1. Home `/`
+
+* Robot face (center)
+* Status text
+* Floating:
+
+  * "Dashboard"
+  * "Upload System"
+
+---
+
+## 2. Upload `/upload`
+
+* File input
+* Preview table
+* Generate system button
+
+---
+
+# 🔗 API ENDPOINTS
 
 ```
 GET /state
-→ returns system state JSON
-
 GET /risk
-→ returns risk level (normal/warning/critical)
-
 GET /speak
-→ returns LLM-generated speech text
+POST /upload_excel
+GET /rag_query
 ```
 
-This API pulls data from:
-
-* system_core
-* fusion_engine
-* reasoning_engine
-
 ---
 
-# 🔄 FRONTEND ↔ BACKEND FLOW
+# 🧠 LOCAL LLM
 
-JS should:
-
-1. Poll `/state` every 1 second
-2. Update:
-
-   * Eye color
-   * Status text
-3. If state changes:
-
-   * Call `/speak`
-   * Trigger robot voice
-
----
-
-# 🧭 DASHBOARD BUTTON
-
-Floating button behavior:
-
-* On click → open Streamlit dashboard
-
-Since notebook environment:
 Use:
 
-```
-window.open("http://localhost:8501", "_blank")
-```
+* Ollama (preferred)
+
+  * mistral OR llama3
+
+OR fallback:
+
+* llama-cpp-python
 
 ---
 
-# 🐳 DOCKER SUPPORT (MANDATORY)
-
-Create Dockerfile:
-
-* Python 3.10+
-* Install:
-
-  * streamlit
-  * fastapi
-  * uvicorn
-  * pyttsx3
-  * opencv
-  * sklearn
-* Expose:
-
-  * 8501 (Streamlit)
-  * 8000 (FastAPI)
-
-Start BOTH:
-
-* Streamlit
-* FastAPI
-
----
-
-# 📓 NOTEBOOK ENVIRONMENT SUPPORT
-
-Since no direct UI:
-
-* Serve HTML using FastAPI (`/`)
-* OR use simple HTTP server
-
-Ensure:
+## Prompt Structure
 
 ```
-http://localhost:8000 → Home UI
-http://localhost:8501 → Dashboard
-```
+System:
+You are an industrial safety AI.
 
----
+Context:
+[RAG retrieved data]
 
-# 🧠 STATE INTERPRETER LOGIC
+Live Data:
+[temp, vibration, risk]
 
-Create mapping:
+User Query:
+...
 
-| Condition  | State    |
-| ---------- | -------- |
-| Risk < 0.4 | NORMAL   |
-| 0.4–0.7    | WARNING  |
-| > 0.7      | CRITICAL |
-
-Return:
-
-```
-{
-  "status": "CRITICAL",
-  "message": "...",
-  "color": "red"
-}
+Respond naturally.
 ```
 
 ---
 
 # ⚡ PERFORMANCE RULES
 
-* DO NOT block threads
-* Use async API
-* Use caching for LLM
-* Voice must not spam (debounce events)
+* Async everywhere
+* Non-blocking threads
+* Cache embeddings
+* Batch RAG queries
+* Voice must not spam
 
 ---
 
-# 🎨 UI QUALITY (IMPORTANT)
+# 🐳 DOCKER REQUIREMENTS
 
-* Smooth animations
-* Glassmorphism panels
-* Industrial futuristic look
-* Responsive design
+Include:
+
+* Python 3.10+
+* FAISS
+* sentence-transformers
+* vosk / whisper.cpp
+* coqui-tts
+* fastapi + uvicorn
+
+Expose:
+
+* 8000 (UI/API)
+* 8501 (Streamlit)
 
 ---
 
-# 🚫 STRICT CONSTRAINTS
+# 📓 NOTEBOOK COMPATIBILITY
+
+* Must run inside Jupyter
+* Use `nest_asyncio`
+* Serve UI via FastAPI
+
+---
+
+# 🚫 CONSTRAINTS
 
 * ❌ No cloud APIs
-* ❌ No breaking existing system
-* ❌ No heavy frontend frameworks (React not allowed)
-* ❌ Must run inside notebook + Docker
+* ❌ No React/Vue
+* ❌ No breaking existing system_core
+* ❌ No blocking loops
 
 ---
 
-# ✅ FINAL OUTPUT
+# ✅ FINAL OUTPUT REQUIREMENTS
 
-You must generate:
+Generate:
 
-1. Full folder structure
-2. All Python files
-3. HTML/CSS/JS UI
-4. Dockerfile
-5. Run instructions
-
-System must run with:
-
-```
-docker build -t sentinelx .
-docker run -p 8000:8000 -p 8501:8501 sentinelx
-```
+1. Full working code
+2. Excel ingestion pipeline
+3. RAG system
+4. Voice loop
+5. UI (robot + upload)
+6. Docker setup
 
 ---
 
 # 🎯 END GOAL
 
-A **Jarvis-like industrial assistant**:
+A **self-configurable industrial AI assistant** that:
 
-* Sees system state
-* Thinks using local LLM
-* Speaks to user
-* Visually reacts (robot face)
-* Runs fully offline
+* Learns from uploaded Excel
+* Adapts monitoring dynamically
+* Talks like a real assistant
+* Reacts visually
+* Works fully offline
 
----
-
-Build this as production-quality code, not prototype.
-
----
-
-# 🚀 PROJECT EVOLUTION & TECHNICAL IMPLEMENTATIONS (June 2026 Update)
-
-Following the initial prompt, the SentinelX AI platform underwent a massive architectural overhaul to achieve true offline capability, robust performance in cloud VM (Jupyter) environments, and a highly polished user experience.
-
-### 1. Architectural Shift: Pure Web UI
-*   **Streamlit Deprecation:** The initial requirement dual-hosted Streamlit and FastAPI. To reduce memory footprint, eliminate UI lag, and provide a unified experience, Streamlit was completely removed.
-*   **Unified Dashboard:** The Industrial Dashboard was rebuilt natively in HTML/CSS/JS (`web_ui/dashboard.html` & `dashboard.js`), utilizing `Chart.js` for telemetry and MJPEG streaming for the YOLOv8 vision feed.
-*   **Single Server:** FastAPI (`api/server.py`) now serves the entire application on port `8000`.
-
-### 2. The Move to Browser-Native Speech APIs
-*   **TTS & STT (Speech):** Local AI voice models (SpeechT5 for TTS and Whisper for STT) were removed to reduce resource consumption and improve system stability.
-    *   **Solution:** Reverted to browser-native `window.speechSynthesis` and `window.webkitSpeechRecognition`. This offloads audio processing to the client browser, ensuring the backend remains lightweight and responsive.
-*   **LLM (Intelligence):** Integrated **TinyLlama-1.1B** via `ctransformers` to provide fast, local inference without API keys.
-
-### 3. Synchronization & Hallucination Fixes
-*   **Deterministic Alerts:** To prevent the 1B LLM from hallucinating critical safety data, system alerts (Warning/Danger) are now generated via strict deterministic rules. The LLM is reserved exclusively for answering direct user chat/voice queries.
-*   **Real-Time Data Sync:** The `/speak` and `/chat` endpoints were optimized to capture a fresh system snapshot *milliseconds* before LLM generation, ensuring the spoken temperature matches the dashboard exactly.
-*   **Speech Queue:** Implemented a robust JavaScript `speechQueue` to handle rapid system state changes. When a new alert triggers, the queue is flushed, and any currently playing (stale) audio is instantly cancelled so the new alert takes priority.
-
-### 4. Cloud VM (AMDO) & Jupyter Adaptations
-*   **Jupyter Execution:** Created `SentinelX.ipynb` for 1-click execution in cloud environments.
-*   **Asyncio Conflicts:** Fixed `RuntimeError: asyncio.run() cannot be called from a running event loop` by replacing `uvicorn.run()` with `uvicorn.Server(config).serve()` inside the notebook cell, allowing it to attach to IPython's existing event loop.
-*   **Vision Hardware Fallback:** Cloud VMs lack physical cameras. Modified `VisionDetector` to attempt a connection once, fail fast, and automatically switch to a generated "VISION OFFLINE" placeholder frame. This prevents OpenCV C++ exceptions from spamming the console and crashing the logic loop.
-
-### 5. Stability & Diagnostics
-*   **High-Fidelity Tracing:** Implemented `sentinelx_trace.log` to capture millisecond-precise events across all threads.
-*   **Client Log Piping:** Added a `/log` endpoint to pipe frontend browser `console.log` statements directly into the Python backend terminal for unified debugging.
-*   **Circular Import Fix:** Resolved a severe PyTorch crash (`torchvision.transforms`) caused by multi-threading race conditions during simultaneous YOLOv8 and Hugging Face initializations.
-*   **WinError 10054 Suppression:** Implemented a custom `asyncio.set_exception_handler` to silently ignore the uncatchable `ConnectionResetError` thrown by Windows when a browser drops an MJPEG stream.
-
-**The system is now a production-grade, offline-first, highly animated industrial AI assistant.**
+This should feel like a **real industrial Jarvis**, not a demo.

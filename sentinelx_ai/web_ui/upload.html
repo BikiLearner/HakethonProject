@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Upload - SentinelX</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .upload-portal {
+            max-width: 600px;
+            margin: auto;
+            background: var(--panel-bg);
+            border: 2px dashed var(--ind-blue);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .file-drop {
+            margin: 30px 0;
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .file-drop:hover { background: rgba(0, 242, 255, 0.05); border-color: var(--ind-blue); }
+        .gen-btn {
+            background: var(--ind-green);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 100px;
+            font-family: var(--font-tech);
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 30px var(--ind-green-glow);
+        }
+    </style>
+</head>
+<body class="industrial-theme">
+    <div class="atmosphere"></div>
+    <div class="scanlines"></div>
+    
+    <div class="ui-wrapper">
+        <header class="glass-header">
+            <div class="system-brand">SENTINELX <span class="v-tag">CONFIG PORTAL</span></div>
+        </header>
+
+        <main style="flex-grow: 1; display: flex; align-items: center;">
+            <div class="upload-portal">
+                <span class="material-icons" style="font-size: 5rem; color: var(--ind-blue);">upload_file</span>
+                <h2 style="font-family: var(--font-tech); letter-spacing: 2px;">SYSTEM RECONFIGURATION</h2>
+                <p style="color: #666;">Upload an Excel (.xlsx) machine specification to redefine AI logic.</p>
+                
+                <input type="file" id="xlsx-file" accept=".xlsx" style="display: none;">
+                <div class="file-drop" onclick="document.getElementById('xlsx-file').click()">
+                    <div id="file-name">CLICK TO SELECT FILE</div>
+                </div>
+                
+                <button id="generate-btn" class="gen-btn" style="display: none;">INITIALIZE RECONFIG</button>
+            </div>
+        </main>
+
+        <nav class="dock-nav">
+            <div class="dock-item" onclick="location.href='/robot.html'">
+                <span class="material-icons">smart_toy</span>
+                <span>AI CORE</span>
+            </div>
+            <div class="dock-item" onclick="location.href='/index.html'">
+                <span class="material-icons">dashboard</span>
+                <span>COMMAND</span>
+            </div>
+            <div class="dock-item active" onclick="location.href='/upload.html'">
+                <span class="material-icons">settings</span>
+                <span>CONFIG</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('xlsx-file');
+        const genBtn = document.getElementById('generate-btn');
+        const fileNameDisp = document.getElementById('file-name');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisp.innerText = "READY: " + e.target.files[0].name;
+                genBtn.style.display = 'inline-block';
+            }
+        });
+
+        genBtn.addEventListener('click', async () => {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            genBtn.innerText = "RECONFIGURING CORE...";
+            genBtn.disabled = true;
+
+            try {
+                const res = await fetch('/upload_excel', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    alert("Reconfiguration Successful.");
+                    location.href = '/robot.html';
+                } else {
+                    alert("Logic Error: " + data.message);
+                }
+            } catch (e) { alert("Link Failure."); }
+            finally { genBtn.innerText = "INITIALIZE RECONFIG"; genBtn.disabled = false; }
+        });
+    </script>
+</body>
+</html>

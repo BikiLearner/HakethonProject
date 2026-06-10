@@ -13,6 +13,7 @@ except ImportError:
 
 from logic.system_core import SystemCore
 from api.server import run_server
+from robot.conversation_manager import ConversationManager
 
 # --- EXHAUSTIVE LOGGING CONFIGURATION ---
 # This logs to BOTH the console and a specialized trace file
@@ -47,8 +48,13 @@ def main():
         # 2. Start Logic Threads
         trace_logger.info("[INIT] Starting background processing threads...")
         core.start()
-        
-        # 3. Run API Server (Blocks main thread)
+
+        # 3. Start Conversation Manager
+        trace_logger.info("[INIT] Initializing Conversation Manager...")
+        converse = ConversationManager(core)
+        converse.start()
+
+        # 4. Run API Server (Blocks main thread)
         trace_logger.info("[INIT] Launching FastAPI Server on http://localhost:8000")
         run_server(core, host="0.0.0.0", port=8000)
 

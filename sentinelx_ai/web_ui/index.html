@@ -3,75 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SentinelX AI - Proactive Assistant</title>
+    <title>SentinelX AI - Strategic Command</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .command-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            grid-template-rows: 1fr 180px;
+            gap: 20px;
+            flex-grow: 1;
+            min-height: 0;
+            padding: 10px;
+        }
+
+        /* LEFT: SYSTEM TELEMETRY */
+        .sidebar-telemetry {
+            grid-row: span 2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: rgba(10, 15, 20, 0.4);
+            border-right: 1px solid var(--border-color);
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .telemetry-header {
+            font-family: var(--font-tech);
+            font-size: 0.75rem;
+            color: var(--ind-blue);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* CENTER: VISION HUB */
+        .vision-hub {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid var(--ind-blue-glow);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
+        }
+
+        #vision-stream {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1) brightness(0.9) saturate(1.1);
+        }
+
+        /* HUD OVERLAYS */
+        .hud-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+        }
+
+        .hud-scanner {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--ind-blue), transparent);
+            animation: scan-move 4s linear infinite;
+        }
+        @keyframes scan-move { 0% { top: 0; } 100% { top: 100%; } }
+
+        .hud-bracket { position: absolute; width: 40px; height: 40px; border: 2px solid var(--ind-blue); opacity: 0.6; }
+        .b-tl { top: 30px; left: 30px; border-right: 0; border-bottom: 0; }
+        .b-tr { top: 30px; right: 30px; border-left: 0; border-bottom: 0; }
+        .b-bl { bottom: 30px; left: 30px; border-right: 0; border-top: 0; }
+        .b-br { bottom: 30px; right: 30px; border-left: 0; border-top: 0; }
+
+        .vision-data-tag {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.7);
+            border-left: 3px solid var(--ind-blue);
+            padding: 10px 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--ind-blue);
+            backdrop-filter: blur(5px);
+        }
+
+        /* BOTTOM: LOGS & INTEL */
+        .intel-strip {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            overflow: hidden;
+        }
+
+        .log-reel {
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            display: flex;
+            gap: 15px;
+        }
+        .log-entry.warn { color: var(--ind-yellow); }
+        .log-entry.crit { color: var(--ind-red); }
+        .log-ts { color: #444; }
+
+        .status-summary {
+            background: rgba(0,0,0,0.3);
+            border-left: 1px solid var(--border-color);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .risk-gauge-mini {
+            height: 60px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .risk-bar-container {
+            width: 100%;
+            height: 4px;
+            background: #111;
+            border-radius: 2px;
+            margin-top: 5px;
+        }
+        .risk-fill {
+            height: 100%;
+            background: var(--ind-blue);
+            box-shadow: 0 0 10px var(--ind-blue-glow);
+            transition: width 0.5s;
+        }
+    </style>
 </head>
-<body>
-    <div class="stars"></div>
-    <div class="container">
-        <div class="glass-panel main-header">
-            <h1 class="title">SENTINELX <span class="accent">AI</span></h1>
-            <div id="status-badge" class="badge green">SYSTEM NOMINAL</div>
-        </div>
+<body class="industrial-theme">
+    <div class="atmosphere"></div>
+    <div class="scanlines"></div>
+    
+    <div class="ui-wrapper">
+        <!-- Dashboard Header -->
+        <header class="glass-header">
+            <div class="system-brand">SENTINELX <span class="v-tag">COMMAND CENTER V5.0</span></div>
+            <div class="machine-status-hub">
+                <div class="status-module">
+                    <span class="s-label">MISSION STATUS</span>
+                    <span id="system-status-text" class="s-value">MONITORING</span>
+                </div>
+                <div class="status-module">
+                    <span class="s-label">SYSTEM CLOCK</span>
+                    <span id="clock" class="s-value" style="font-family: 'Share Tech Mono';">00:00:00</span>
+                </div>
+            </div>
+        </header>
 
-        <div class="robot-stage">
-            <div class="robot-container">
-                <div class="robot-face">
-                    <div class="eyes">
-                        <div class="eye left" id="eye-left">
-                            <div class="pupil"></div>
-                        </div>
-                        <div class="eye right" id="eye-right">
-                            <div class="pupil"></div>
+        <main class="command-layout">
+            <!-- Sidebar: Telemetry -->
+            <aside class="sidebar-telemetry">
+                <div class="telemetry-header">
+                    <span>SENSOR ARRAY</span>
+                    <span style="color: #444;">ACTIVE</span>
+                </div>
+                <div id="dynamic-metrics" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Telemetry Panels -->
+                </div>
+            </aside>
+
+            <!-- Main: Vision Hub -->
+            <section class="vision-hub">
+                <img id="vision-stream" src="/video_feed" alt="Vision Stream">
+                <div class="hud-layer">
+                    <div class="hud-scanner"></div>
+                    <div class="hud-bracket b-tl"></div><div class="hud-bracket b-tr"></div>
+                    <div class="hud-bracket b-bl"></div><div class="hud-bracket b-br"></div>
+                    
+                    <div class="vision-data-tag">
+                        <div style="font-size: 0.6rem; color: #555; margin-bottom: 2px;">LIVE ANALYTICS</div>
+                        <div id="vision-id">OBJECT RECOGNITION: PASSIVE</div>
+                        <div id="vision-fps">FEED RATE: 20 FPS</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer: Intelligence -->
+            <footer class="intel-strip">
+                <div class="log-reel" id="event-logs">
+                    <!-- Logs appear here -->
+                </div>
+                <div class="status-summary">
+                    <div class="s-label" style="text-align: center;">AGGREGATED RISK PROBABILITY</div>
+                    <div class="risk-gauge-mini">
+                        <div style="width: 100%;">
+                            <div style="display: flex; justify-content: space-between; font-family: 'Share Tech Mono'; font-size: 1.2rem;">
+                                <span id="risk-val-text">0.0</span>
+                                <span id="risk-pct-text">0%</span>
+                            </div>
+                            <div class="risk-bar-container">
+                                <div id="risk-fill" class="risk-fill" style="width: 0%;"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="cheeks">
-                        <div class="cheek left"></div>
-                        <div class="cheek right"></div>
-                    </div>
-                    <div class="mouth" id="mouth"></div>
                 </div>
-                <div class="glow" id="glow"></div>
-                <div class="rings">
-                    <div class="ring"></div>
-                    <div class="ring"></div>
-                    <div class="ring"></div>
-                </div>
-            </div>
-            
-            <div class="speech-bubble-container">
-                <div class="speech-bubble" id="speech-bubble">
-                    Hello! I am SentinelX. I'm monitoring your systems.
-                </div>
-            </div>
-        </div>
+            </footer>
+        </main>
 
-        <div class="interaction-zone">
-            <div class="chat-input-container">
-                <input type="text" id="chat-input" placeholder="Ask me something...">
-                <button id="btn-send" class="icon-btn"><span class="material-icons">send</span></button>
-                <button id="btn-listen" class="icon-btn mic-btn"><span class="material-icons">mic</span></button>
+        <!-- Global Navigation -->
+        <nav class="dock-nav">
+            <div class="dock-item" onclick="location.href='/robot.html'">
+                <span class="material-icons">smart_toy</span>
+                <span>AI CORE</span>
             </div>
-            <div id="listening-indicator" class="hidden">Listening...</div>
-        </div>
-
-        <div class="bottom-controls">
-            <div class="mini-metrics">
-                <div class="mini-metric">
-                    <span class="m-label">RISK</span>
-                    <span id="risk-value" class="m-val">0%</span>
-                </div>
-                <div class="mini-metric">
-                    <span class="m-label">TEMP</span>
-                    <span id="temp-value" class="m-val">0°C</span>
-                </div>
+            <div class="dock-item active" onclick="location.href='/index.html'">
+                <span class="material-icons">dashboard</span>
+                <span>COMMAND</span>
             </div>
-            <button onclick="openDashboard()" class="btn-dashboard">
-                <span>ENTER COMMAND CENTER</span>
-                <div class="btn-glow"></div>
-            </button>
-        </div>
+            <div class="dock-item" onclick="location.href='/upload.html'">
+                <span class="material-icons">settings</span>
+                <span>CONFIG</span>
+            </div>
+        </nav>
     </div>
 
     <script src="app.js"></script>

@@ -1,0 +1,39 @@
+Machine Type: Hydraulic Press
+Sensor temperature: Warning threshold is 70.0°C, Critical threshold is 85.0°C. Main piston temperature monitoring
+Sensor vibration: Warning threshold is 2.0mm/s, Critical threshold is 3.5mm/s. Structural vibration of the press base
+Sensor oil pressure: Warning threshold is 150.0Bar, Critical threshold is 180.0Bar. Hydraulic line pressure for piston force
+Sensor cycle time: Warning threshold is 5.0s, Critical threshold is 8.0s. Time taken to complete one full press cycle
+Safety Rule: Shut down system if vibration exceeds 3.5 mm/s
+Safety Rule: Operator must maintain 2 meter distance
+Safety Rule: Check oil levels every 100 cycles
+Safety Rule: Emergency stop if pressure drops below 50 Bar
+Environment Setting Floor: Main Factory Floor
+Environment Setting Zone: A-42 Safety Zone
+Environment Setting Maintenance: Bi-weekly
+Environment Setting Power: 440V Industrial
+Machine Type: Hydraulic Press
+Sensor temperature: Warning threshold is 70.0°C, Critical threshold is 85.0°C. Main piston temperature monitoring
+Sensor vibration: Warning threshold is 2.0mm/s, Critical threshold is 3.5mm/s. Structural vibration of the press base
+Sensor oil pressure: Warning threshold is 150.0Bar, Critical threshold is 180.0Bar. Hydraulic line pressure for piston force
+Sensor cycle time: Warning threshold is 5.0s, Critical threshold is 8.0s. Time taken to complete one full press cycle
+Safety Rule: Shut down system if vibration exceeds 3.5 mm/s
+Safety Rule: Operator must maintain 2 meter distance
+Safety Rule: Check oil levels every 100 cycles
+Safety Rule: Emergency stop if pressure drops below 50 Bar
+Environment Setting Floor: Main Factory Floor
+Environment Setting Zone: A-42 Safety Zone
+Environment Setting Maintenance: Bi-weekly
+Environment Setting Power: 440V Industrial
+Machine Type: Hydraulic Press
+Sensor temperature: Warning threshold is 70.0°C, Critical threshold is 85.0°C. Main piston temperature monitoring
+Sensor vibration: Warning threshold is 2.0mm/s, Critical threshold is 3.5mm/s. Structural vibration of the press base
+Sensor oil pressure: Warning threshold is 150.0Bar, Critical threshold is 180.0Bar. Hydraulic line pressure for piston force
+Sensor cycle time: Warning threshold is 5.0s, Critical threshold is 8.0s. Time taken to complete one full press cycle
+Safety Rule: Shut down system if vibration exceeds 3.5 mm/s
+Safety Rule: Operator must maintain 2 meter distance
+Safety Rule: Check oil levels every 100 cycles
+Safety Rule: Emergency stop if pressure drops below 50 Bar
+Environment Setting Floor: Main Factory Floor
+Environment Setting Zone: A-42 Safety Zone
+Environment Setting Maintenance: Bi-weekly
+Environment Setting Power: 440V Industrial

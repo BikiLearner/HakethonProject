@@ -124,38 +124,34 @@ class FusionEngine:
     
     def _assess_temperature_risk(self, temperature: float) -> float:
         """
-        Assess risk based on temperature
-        
-        Args:
-            temperature: Temperature in Celsius
-        
-        Returns:
-            float: Risk score 0.0-1.0
+        Assess risk based on temperature using dynamic thresholds
         """
-        if temperature < 70:
+        from custom_system.config_manager import ConfigManager
+        cm = ConfigManager()
+        warning, critical = cm.get_thresholds("temperature", 70.0, 85.0)
+        
+        if temperature < warning:
             return 0.0
-        elif temperature < 80:
+        elif temperature < (warning + critical) / 2:
             return 0.3
-        elif temperature < 85:
+        elif temperature < critical:
             return 0.6
         else:
             return 1.0
     
     def _assess_vibration_risk(self, vibration: float) -> float:
         """
-        Assess risk based on vibration
-        
-        Args:
-            vibration: Vibration level in mm/s
-        
-        Returns:
-            float: Risk score 0.0-1.0
+        Assess risk based on vibration using dynamic thresholds
         """
-        if vibration < 1.0:
+        from custom_system.config_manager import ConfigManager
+        cm = ConfigManager()
+        warning, critical = cm.get_thresholds("vibration", 1.0, 3.0)
+        
+        if vibration < warning:
             return 0.0
-        elif vibration < 2.0:
+        elif vibration < (warning + critical) / 2:
             return 0.3
-        elif vibration < 3.0:
+        elif vibration < critical:
             return 0.6
         else:
             return 1.0
