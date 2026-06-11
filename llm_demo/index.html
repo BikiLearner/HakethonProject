@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelX AI V5 | Robot Console</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="robot">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="SentinelX AI home">
+        <span class="brand-mark"></span>
+        <span>SentinelX AI V5</span>
+      </a>
+      <nav class="nav">
+        <a class="active" href="index.html">Robot</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="upload.html">Configure</a>
+      </nav>
+      <span class="system-pill" id="systemPill">SYNCING</span>
+    </header>
+
+    <main class="robot-grid robot-command-grid">
+      <section class="hero-panel robot-core-panel">
+        <div class="robot-hud-top">
+          <div>
+            <div class="panel-kicker">Proactive Core Interface</div>
+            <h1>SentinelX AI Core</h1>
+            <p id="robotContext">Awaiting system configuration. Voice responses are running in generic mode.</p>
+          </div>
+          <div class="core-readout">
+            <span>CORE V5.0</span>
+            <strong id="robotStateText">Idle monitoring active</strong>
+          </div>
+        </div>
+
+        <div class="robot-stage">
+          <div class="core-orbit orbit-one"></div>
+          <div class="core-orbit orbit-two"></div>
+          <div class="robot-face idle" id="robotFace" aria-label="SentinelX robot face">
+            <div class="robot-crown">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="head-shell">
+              <div class="screen-inner">
+                <div class="eye-bar">
+                  <div class="eye-module">
+                    <span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                  <div class="eye-module">
+                    <span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                </div>
+                <div class="face-cheeks">
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="speaker-grid">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="mouth-line"></div>
+              </div>
+            </div>
+            <div class="jaw-plate"></div>
+          </div>
+        </div>
+
+        <div class="speech-glass">
+          <span class="status-dot" id="statusDot"></span>
+          <p id="robotResponse">Standing by for operator query.</p>
+        </div>
+      </section>
+
+      <aside class="control-stack">
+        <section class="glass-panel command-panel">
+          <div class="panel-title">
+            <span>Voice Command</span>
+            <small id="commandMode">AI Proactive Core</small>
+          </div>
+          <button class="primary-action" id="micButton" type="button">
+            <span class="mic-icon"></span>
+            <span>Activate Mic</span>
+          </button>
+          <div class="response-box">
+            <span class="response-label">Core Signal</span>
+            <p>Voice output is synchronized with the main AI core display.</p>
+          </div>
+        </section>
+
+        <section class="glass-panel memory-panel">
+          <div class="panel-title">
+            <span>Memory Matrix</span>
+            <small>Active Context</small>
+          </div>
+          <div class="memory-grid">
+            <button data-query="status">Status</button>
+            <button data-query="risk">Risk</button>
+            <button data-query="health">Health</button>
+            <button data-query="helmet">Helmet</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <audio id="clickSound" preload="auto" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+  <audio id="alertSound" preload="auto" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+  <script src="app.js"></script>
+</body>
+</html>

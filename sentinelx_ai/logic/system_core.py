@@ -8,6 +8,8 @@ import logging
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 
+from matplotlib import text
+
 from simulator.machine_simulator import MachineSimulator
 from vision.vision_detector import VisionDetector, DetectionResult
 from logic.fusion_engine import FusionEngine
@@ -34,6 +36,7 @@ class SystemCore:
         self.vision_detector = VisionDetector(use_cpu=True)
         self.fusion_engine = FusionEngine()
         self.reasoning_engine = ReasoningEngine()
+        self.ai_response = ""
         
         # Shared State
         self.state = SystemState(
@@ -45,6 +48,10 @@ class SystemCore:
         self.lock = threading.Lock()
         self._stop_event = threading.Event()
         self._threads = []
+
+    def set_ai_response(self, text):
+        self.ai_response = text
+
 
     def start(self):
         if self.state.is_running:
@@ -125,7 +132,10 @@ class SystemCore:
                 "last_frame": self.state.last_frame,
                 "load": self.simulator.load,
                 "wear_level": self.simulator.wear_level,
-                "last_update": self.state.last_update_time
+                "last_update": self.state.last_update_time,
+                "ai_response": self.ai_response,
+                
+
             }
 
     def set_triggers(self, warning: bool, critical: bool):

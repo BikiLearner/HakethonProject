@@ -46,18 +46,27 @@ class ReasoningEngine:
         person = fused_data.get("person_detected", False)
         risk = fused_data.get("risk_score", 0)
         
+        from custom_system.config_manager import ConfigManager
+        cm = ConfigManager()
+        temp_warning, temp_critical = cm.get_thresholds("temperature", 70.0, 85.0)
+        vib_warning, vib_critical = cm.get_thresholds("vibration", 1.0, 3.0)
+        
         # Safe rule-based fallback if ML fails
         status = "SAFE"
         action = "NORMAL"
         issue = "NONE"
         
-        if temp > 85 or vib > 3.0:
+        if temp > temp_critical or vib > vib_critical:
             status = "DANGER"
             action = "SHUTDOWN"
-            issue = "CRITICAL LIMIT"
-        elif person:
+            issue = f"CRITICAL LIMIT (Temp: {temp_critical}, Vib: {vib_critical})"
+        elif temp > temp_warning or vib > vib_warning:
             status = "CAUTION"
             action = "MONITOR"
+            issue = "ELEVATED PARAMETERS"
+        elif person:
+            status = "CAUTION"
+            action = "WATCH"
             issue = "PERSONNEL PRESENT"
 
-        return Decision(status, 0.9, "Stable", action, issue, {}, 0.0)
+        return Decision(status, 0.9, "Steady", action, issue, {}, 0.0)

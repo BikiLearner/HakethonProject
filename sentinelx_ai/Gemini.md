@@ -1,351 +1,331 @@
-# 🤖 BUILD INSTRUCTION PROMPT — SentinelX AI Voice Robot + Web UI (Notebook + Docker + Local LLM)
+# 🤖 SentinelX AI V5 — DEMO MODE (Hackathon Video Build)
 
-You are a senior AI systems engineer.
+You are a **principal frontend + simulation architect + UX reverse engineer**.
 
-Your task is to EXTEND an existing industrial AI system called **SentinelX AI (Streamlit + Python backend)** into a **multi-interface system** with:
+Your task is to create a **FULLY HARDCODED DEMO VERSION** of SentinelX AI V5 for a hackathon video.
 
-1. A **Home Screen (HTML/CSS/JS UI)**
-2. A **Speaking Robot Assistant (with animated face)**
-3. Integration with a **Local LLM (offline)**
-4. Full support for **Docker + Notebook-only environments**
-5. Seamless navigation to existing **Streamlit Dashboard**
+⚠️ IMPORTANT:
 
----
-
-# 🎯 CORE OBJECTIVE
-
-Transform SentinelX from a Streamlit-only dashboard into a **dual-interface system**:
-
-* 🧠 Backend → existing Python multi-threaded system (DO NOT BREAK)
-* 🌐 Frontend → new HTML/CSS UI (runs in notebook environment)
-* 🤖 Robot → voice + animated assistant connected to system state
-* 🐳 Deployment → fully Dockerized and runnable inside Jupyter/Notebook
+* This is NOT a real system
+* This is a **visual + behavioral simulation only**
+* Everything must LOOK real but can be FAKE internally
 
 ---
 
-# 🧱 SYSTEM ARCHITECTURE (MANDATORY)
+# 🧠 CRITICAL INSTRUCTION (VERY IMPORTANT)
 
-Follow this structure strictly:
+Before generating anything:
 
-```
-sentinelx_ai/
+1. **Analyze the EXISTING SentinelX codebase and UI**
+2. Understand:
+
+   * Layout structure
+   * Color theme
+   * Typography
+   * Spacing system
+   * Component patterns
+   * Existing dashboard design
+3. **MIMIC and EXTEND the same design language**
+
+⚠️ DO NOT create a completely new UI
+⚠️ It must feel like a **natural extension of the current system**
+
+---
+
+# 🎯 OBJECTIVE
+
+Build a **cinematic, high-quality demo system** that simulates:
+
+* AI voice assistant 🤖
+* Excel-based configuration 📊
+* Dynamic dashboard 📈
+* Industrial robot UI 🎛️
+* Camera-based safety detection 🎥
+
+Using:
+
+✅ HTML
+✅ CSS
+✅ Vanilla JavaScript
+❌ No backend
+❌ No real AI
+❌ No APIs
+
+---
+
+# 📁 PROJECT STRUCTURE
+
+```id="proj12"
+llm_demo/
 │
-├── main.py  (existing - DO NOT BREAK)
-├── api/
-│   └── server.py  <-- NEW (FastAPI bridge)
+├── index.html
+├── dashboard.html
+├── upload.html
+├── style.css
+├── app.js
+├── assets/
+│   ├── sounds/
+│   ├── animations/
+│   ├── fake_data.json
 │
-├── robot/
-│   ├── voice_engine.py
-│   ├── llm_engine.py
-│   ├── state_interpreter.py
-│
-├── web_ui/
-│   ├── index.html
-│   ├── style.css
-│   ├── app.js
-│
-├── docker/
-│   └── Dockerfile
 ```
 
 ---
 
-# 🌐 FRONTEND REQUIREMENTS (HTML/CSS/JS ONLY)
+# 🤖 PAGE 1 — ROBOT UI (index.html)
 
-Create a **modern industrial UI homepage**:
+## Design:
 
-## Home Screen:
+* Square industrial robot face
+* Metallic panel + glassmorphism
+* LED strip eyes
 
-* Fullscreen dark UI
-* Center → **Robot Face**
-* Floating button → **"Open Dashboard"**
+## States:
 
-## Robot Face Design:
+* Idle → Blue glow
+* Thinking → Pulsing
+* Warning → Yellow flicker
+* Critical → Red flashing
 
-* Circular robotic face
-* Two animated eyes
+## Behavior:
 
-### Eye Colors:
+* Auto speaks every 5–8 seconds
+* Uses:
 
-* 🟢 Green → Normal
-* 🟡 Yellow → Warning
-* 🔴 Red → Critical
+```js
+speechSynthesis.speak(...)
+```
 
-Use smooth CSS animations (glow/pulse effect).
+## Fake STT:
+
+* Mic button → simulate listening → random query
+
+## AI Memory:
+
+```js
+const MEMORY = {
+  status: "System is operating within safe limits",
+  risk: "Current risk level is medium due to elevated temperature",
+  helmet: "Warning. Worker detected without helmet in zone 3",
+};
+```
+
+## Context Awareness:
+
+* Before config → generic answers
+* After config → machine-specific + safety alerts
 
 ---
 
-# 🎤 ROBOT BEHAVIOR (CRITICAL)
+# 📊 PAGE 2 — DASHBOARD (dashboard.html)
 
-The robot must:
-
-### 1. Speak System Status
-
-Examples:
-
-* "System operating normally"
-* "Warning: Temperature rising"
-* "Critical alert: Machine overheating"
-
-### 2. Speak ONLY on:
-
-* State change
-* Critical anomaly
-* User interaction
-
-### 3. Voice Engine:
-
-Use:
-
-* `pyttsx3` (offline TTS) OR
-* Coqui TTS (preferred if possible)
+## TWO STATES
 
 ---
 
-# 🧠 LOCAL LLM INTEGRATION
+## 🔹 BEFORE CONFIG
 
-Use a **local LLM (NO API CALLS)**:
-
-Preferred:
-
-* Ollama (Mistral / LLaMA3)
-* OR llama-cpp-python
-
-## LLM ROLE:
-
-Convert raw system data → human speech
-
-Example:
-
-Input:
-
-```
-temperature=92, vibration=3.2, risk=0.87
-```
-
-Output:
-
-```
-"Critical condition detected. Temperature and vibration exceed safe limits."
-```
+* "No system configured"
+* Disabled UI
+* Grey charts
+* Static camera feed placeholder
 
 ---
 
-# 🔗 BACKEND INTEGRATION (VERY IMPORTANT)
+## 🔹 AFTER CONFIG
 
-DO NOT modify core system threads.
+### Machine Panel:
 
-Instead:
-
-### Create FastAPI bridge:
-
-`api/server.py`
-
-Endpoints:
-
-```
-GET /state
-→ returns system state JSON
-
-GET /risk
-→ returns risk level (normal/warning/critical)
-
-GET /speak
-→ returns LLM-generated speech text
-```
-
-This API pulls data from:
-
-* system_core
-* fusion_engine
-* reasoning_engine
+* Machine: Hydraulic Press
+* Temp: 78°C (animated)
+* Risk: Medium
+* Vibration: Active
 
 ---
 
-# 🔄 FRONTEND ↔ BACKEND FLOW
+## 🎥 CAMERA SAFETY PANEL (IMPORTANT FEATURE)
 
-JS should:
+Simulate **AI camera monitoring**
 
-1. Poll `/state` every 1 second
-2. Update:
+### UI:
 
-   * Eye color
-   * Status text
-3. If state changes:
+* Video box (fake feed using image/gif)
+* Label: "Live Camera Feed"
+* Overlay bounding box animation
 
-   * Call `/speak`
-   * Trigger robot voice
+### Behavior:
 
----
+* After 3–5 seconds:
 
-# 🧭 DASHBOARD BUTTON
+  * Show detection box on "person"
+  * Display:
 
-Floating button behavior:
+🚨 **"No Helmet Detected"**
 
-* On click → open Streamlit dashboard
+### Effects:
 
-Since notebook environment:
-Use:
+* Red flashing border
+* Warning text blinking
+* Play alert sound
 
-```
-window.open("http://localhost:8501", "_blank")
+### Extra realism:
+
+* Show:
+
+  * Confidence: 92%
+  * Object: Person
+
+### Fake Logic:
+
+```js
+setTimeout(() => {
+  showHelmetWarning();
+}, 4000);
 ```
 
 ---
 
-# 🐳 DOCKER SUPPORT (MANDATORY)
+## State Toggle:
 
-Create Dockerfile:
-
-* Python 3.10+
-* Install:
-
-  * streamlit
-  * fastapi
-  * uvicorn
-  * pyttsx3
-  * opencv
-  * sklearn
-* Expose:
-
-  * 8501 (Streamlit)
-  * 8000 (FastAPI)
-
-Start BOTH:
-
-* Streamlit
-* FastAPI
-
----
-
-# 📓 NOTEBOOK ENVIRONMENT SUPPORT
-
-Since no direct UI:
-
-* Serve HTML using FastAPI (`/`)
-* OR use simple HTTP server
-
-Ensure:
-
-```
-http://localhost:8000 → Home UI
-http://localhost:8501 → Dashboard
+```js
+localStorage.setItem("configured", true)
 ```
 
 ---
 
-# 🧠 STATE INTERPRETER LOGIC
+# 📤 PAGE 3 — UPLOAD (upload.html)
 
-Create mapping:
+## UI:
 
-| Condition  | State    |
-| ---------- | -------- |
-| Risk < 0.4 | NORMAL   |
-| 0.4–0.7    | WARNING  |
-| > 0.7      | CRITICAL |
+* Drag & drop Excel box
+* Industrial design panel
 
-Return:
+## On Upload:
 
-```
-{
-  "status": "CRITICAL",
-  "message": "...",
-  "color": "red"
-}
-```
+### CINEMATIC LOADING:
 
----
+Messages:
 
-# ⚡ PERFORMANCE RULES
+* Parsing machine specs...
+* Building sensor models...
+* Calibrating thresholds...
+* Deploying AI system...
 
-* DO NOT block threads
-* Use async API
-* Use caching for LLM
-* Voice must not spam (debounce events)
+### Include:
+
+* Progress bar
+* Fake logs (scrolling)
+* Animated %
 
 ---
 
-# 🎨 UI QUALITY (IMPORTANT)
+## After Loading:
 
+* Show:
+
+✅ Hydraulic Press Configured
+
+* Save:
+
+```js
+localStorage.setItem("configured", true)
+```
+
+* Redirect → dashboard
+
+---
+
+# 📄 FAKE EXCEL DATA
+
+| Machine         | Temp | Vibration | Status |
+| --------------- | ---- | --------- | ------ |
+| Hydraulic Press | 85   | 2.5       | Active |
+
+---
+
+# 🎨 UI QUALITY
+
+* Match existing SentinelX UI
+* Neon + industrial theme
 * Smooth animations
 * Glassmorphism panels
-* Industrial futuristic look
-* Responsive design
+* Professional spacing
 
 ---
 
-# 🚫 STRICT CONSTRAINTS
+# 🔊 SOUND DESIGN
 
-* ❌ No cloud APIs
-* ❌ No breaking existing system
-* ❌ No heavy frontend frameworks (React not allowed)
-* ❌ Must run inside notebook + Docker
-
----
-
-# ✅ FINAL OUTPUT
-
-You must generate:
-
-1. Full folder structure
-2. All Python files
-3. HTML/CSS/JS UI
-4. Dockerfile
-5. Run instructions
-
-System must run with:
-
-```
-docker build -t sentinelx .
-docker run -p 8000:8000 -p 8501:8501 sentinelx
-```
+* Button click
+* Robot hum
+* Alert beep (helmet warning)
 
 ---
 
-# 🎯 END GOAL
+# 🧠 FAKE AI LOGIC
 
-A **Jarvis-like industrial assistant**:
+* Robot reacts to:
 
-* Sees system state
-* Thinks using local LLM
-* Speaks to user
-* Visually reacts (robot face)
-* Runs fully offline
+  * System state
+  * Helmet alert
 
----
-
-Build this as production-quality code, not prototype.
+Example:
+"Critical safety violation detected. Worker without helmet."
 
 ---
 
-# 🚀 PROJECT EVOLUTION & TECHNICAL IMPLEMENTATIONS (June 2026 Update)
+# 🎬 DEMO FLOW (IMPORTANT)
 
-Following the initial prompt, the SentinelX AI platform underwent a massive architectural overhaul to achieve true offline capability, robust performance in cloud VM (Jupyter) environments, and a highly polished user experience.
+1. Open Robot UI
+2. Robot speaks
+3. Mic interaction
+4. Go → Dashboard → NOT CONFIGURED
+5. Go → Upload
+6. Upload Excel → cinematic loading
+7. Config complete
+8. Dashboard updates
+9. Camera detects **no helmet → alert triggers 🔥**
+10. Return to robot → reacts to safety issue
 
-### 1. Architectural Shift: Pure Web UI
-*   **Streamlit Deprecation:** The initial requirement dual-hosted Streamlit and FastAPI. To reduce memory footprint, eliminate UI lag, and provide a unified experience, Streamlit was completely removed.
-*   **Unified Dashboard:** The Industrial Dashboard was rebuilt natively in HTML/CSS/JS (`web_ui/dashboard.html` & `dashboard.js`), utilizing `Chart.js` for telemetry and MJPEG streaming for the YOLOv8 vision feed.
-*   **Single Server:** FastAPI (`api/server.py`) now serves the entire application on port `8000`.
+---
 
-### 2. The Move to Browser-Native Speech APIs
-*   **TTS & STT (Speech):** Local AI voice models (SpeechT5 for TTS and Whisper for STT) were removed to reduce resource consumption and improve system stability.
-    *   **Solution:** Reverted to browser-native `window.speechSynthesis` and `window.webkitSpeechRecognition`. This offloads audio processing to the client browser, ensuring the backend remains lightweight and responsive.
-*   **LLM (Intelligence):** Integrated **TinyLlama-1.1B** via `ctransformers` to provide fast, local inference without API keys.
+# ✨ BONUS EFFECTS
 
-### 3. Synchronization & Hallucination Fixes
-*   **Deterministic Alerts:** To prevent the 1B LLM from hallucinating critical safety data, system alerts (Warning/Danger) are now generated via strict deterministic rules. The LLM is reserved exclusively for answering direct user chat/voice queries.
-*   **Real-Time Data Sync:** The `/speak` and `/chat` endpoints were optimized to capture a fresh system snapshot *milliseconds* before LLM generation, ensuring the spoken temperature matches the dashboard exactly.
-*   **Speech Queue:** Implemented a robust JavaScript `speechQueue` to handle rapid system state changes. When a new alert triggers, the queue is flushed, and any currently playing (stale) audio is instantly cancelled so the new alert takes priority.
+* Red glow during alerts
+* Typing animation
+* Fake logs scrolling
+* Subtle zoom animation
 
-### 4. Cloud VM (AMDO) & Jupyter Adaptations
-*   **Jupyter Execution:** Created `SentinelX.ipynb` for 1-click execution in cloud environments.
-*   **Asyncio Conflicts:** Fixed `RuntimeError: asyncio.run() cannot be called from a running event loop` by replacing `uvicorn.run()` with `uvicorn.Server(config).serve()` inside the notebook cell, allowing it to attach to IPython's existing event loop.
-*   **Vision Hardware Fallback:** Cloud VMs lack physical cameras. Modified `VisionDetector` to attempt a connection once, fail fast, and automatically switch to a generated "VISION OFFLINE" placeholder frame. This prevents OpenCV C++ exceptions from spamming the console and crashing the logic loop.
+---
 
-### 5. Stability & Diagnostics
-*   **High-Fidelity Tracing:** Implemented `sentinelx_trace.log` to capture millisecond-precise events across all threads.
-*   **Client Log Piping:** Added a `/log` endpoint to pipe frontend browser `console.log` statements directly into the Python backend terminal for unified debugging.
-*   **Circular Import Fix:** Resolved a severe PyTorch crash (`torchvision.transforms`) caused by multi-threading race conditions during simultaneous YOLOv8 and Hugging Face initializations.
-*   **WinError 10054 Suppression:** Implemented a custom `asyncio.set_exception_handler` to silently ignore the uncatchable `ConnectionResetError` thrown by Windows when a browser drops an MJPEG stream.
+# 🚫 CONSTRAINTS
 
-**The system is now a production-grade, offline-first, highly animated industrial AI assistant.**
+* No backend
+* No APIs
+* No real ML
+* Everything instant
+
+---
+
+# ✅ OUTPUT REQUIRED
+
+Generate FULL WORKING CODE:
+
+* index.html
+* dashboard.html
+* upload.html
+* style.css
+* app.js
+* fake_data.json
+
+---
+
+# 🎯 FINAL GOAL
+
+A **cinematic industrial AI demo** that:
+
+* Feels real
+* Matches existing UI
+* Shows AI + safety intelligence
+* Impresses judges instantly
+
+This must feel like a **real industrial Jarvis system**, not a prototype.

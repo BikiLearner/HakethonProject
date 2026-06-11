@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelX AI V5 | Configure</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="upload">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="SentinelX AI home">
+        <span class="brand-mark"></span>
+        <span>SentinelX AI V5</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Robot</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="upload.html">Configure</a>
+      </nav>
+      <span class="system-pill" id="systemPill">SYNCING</span>
+    </header>
+
+    <main class="upload-layout">
+      <section class="glass-panel upload-panel">
+        <div class="panel-kicker">Configuration Intake</div>
+        <h1>Deploy SentinelX Profile</h1>
+        <p>Drop the machine configuration workbook to activate the hardcoded Hydraulic Press demo.</p>
+
+        <button class="drop-zone" id="dropZone" type="button">
+          <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display: none;">
+          <span class="upload-icon"></span>
+          <strong>Drop Excel file here</strong>
+          <small>or click to select configuration file</small>
+        </button>
+
+        <div class="preview-table" style="display: none;">
+          <div class="panel-title">
+            <span>Excel Preview</span>
+            <small>machine_config.xlsx</small>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Machine</th>
+                <th>Temperature</th>
+                <th>Risk</th>
+                <th>Vibration</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Autonomous CNC Center</td>
+                <td>64.5&deg;C</td>
+                <td>Nominal</td>
+                <td>0.12 mm/s</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="glass-panel loading-panel" id="loadingPanel">
+        <div class="panel-title">
+          <span>Deployment Pipeline</span>
+          <small id="progressLabel">0%</small>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <ul class="log-list" id="logList"></ul>
+      </aside>
+    </main>
+  </div>
+
+  <audio id="clickSound" preload="auto" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+  <audio id="alertSound" preload="auto" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+  <script src="app.js"></script>
+</body>
+</html>

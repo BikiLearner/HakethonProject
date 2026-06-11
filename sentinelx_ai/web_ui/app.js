@@ -1,272 +1,342 @@
 const API_BASE = window.location.protocol + "//" + window.location.host;
 
 let lastStatus = "";
-let isListening = false;
+let lastThinking = false;
 let isSpeaking = false;
-let speechQueue = [];
-
-// Native Speech Recognition Setup
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-
-if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-        isListening = true;
-        document.getElementById('btn-listen').classList.add('active');
-        document.getElementById('listening-indicator').classList.remove('hidden');
-        document.getElementById('listening-indicator').innerText = "Listening... (Speak now)";
-        serverLog("[TRACE STT] Native recognition started.");
-    };
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        serverLog(`[TRACE STT] Recognized: '${transcript}'`);
-        document.getElementById('chat-input').value = transcript;
-        sendChatMessage(transcript);
-    };
-
-    recognition.onerror = (e) => {
-        serverLog(`[TRACE STT] Recognition error: ${e.error}`, "ERROR");
-    };
-
-    recognition.onend = () => {
-        isListening = false;
-        document.getElementById('btn-listen').classList.remove('active');
-        document.getElementById('listening-indicator').classList.add('hidden');
-        serverLog("[TRACE STT] Native recognition ended.");
-    };
-}
-
-// Utility to send logs to python terminal
-function serverLog(message, level="INFO") {
-    fetch(`${API_BASE}/log`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level: level, message: message })
-    }).catch(e => console.error("Failed to send log to server", e));
-    console.log(message);
-}
+let lastSpeech = "";
+let lastSpeaking = false;
+let speakingTimeout = null;
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let mouthAnimating = false;
+const robotHead = document.getElementById("robot-head");
 
 // ----------------------------------------------------
-// STATE SYNC
+// STATE SYNC & REACTIVITY
 // ----------------------------------------------------
 async function updateState() {
-    try {
-        const response = await fetch(`${API_BASE}/state`);
-        const data = await response.json();
-        if (data.error) return;
+  try {
+    const response = await fetch(`${API_BASE}/state`);
+    const data = await response.json();
+    if (data.error) return;
 
-        document.getElementById('risk-value').innerText = `${(data.risk_score * 100).toFixed(0)}%`;
-        document.getElementById('temp-value').innerText = `${data.machine_state ? data.machine_state.temperature.toFixed(1) : 0}°C`;
+    // 1. Header & Context Updates
+    const machineEl = document.getElementById("active-machine");
+    if (machineEl) machineEl.innerText = data.machine_name || "GENERIC UNIT";
 
-        const badge = document.getElementById('status-badge');
-        badge.innerText = `SYSTEM ${data.status === 'SAFE' ? 'NOMINAL' : data.status}`;
-        
-        if (data.status !== lastStatus) {
-            serverLog(`[TRACE EVENT] Status changed from ${lastStatus} to ${data.status}`);
-            handleStatusChange(data.status, data.risk_score);
-            lastStatus = data.status;
-        }
-    } catch (error) {
-        console.error("Update failed:", error);
-    }
-}
+    const statusEl = document.getElementById("system-status-text");
+    if (statusEl) statusEl.innerText = data.status || "IDLE";
 
-function handleStatusChange(status, risk) {
-    const eyeLeft = document.getElementById('eye-left');
-    const eyeRight = document.getElementById('eye-right');
-    const glow = document.getElementById('glow');
-    const badge = document.getElementById('status-badge');
-    const mouth = document.getElementById('mouth');
-
-    let color = "#00ffcc";
-    let glowColor = "rgba(0, 255, 204, 0.15)";
-    let badgeClass = "badge green";
-
-    if (status === "DANGER" || risk > 0.7) {
-        color = "#ff3e3e";
-        glowColor = "rgba(255, 62, 62, 0.25)";
-        badgeClass = "badge red";
-    } else if (status === "CAUTION" || risk > 0.4) {
-        color = "#ffdf00";
-        glowColor = "rgba(255, 223, 0, 0.2)";
-        badgeClass = "badge yellow";
-    }
-
-    eyeLeft.style.backgroundColor = color;
-    eyeLeft.style.boxShadow = `0 0 30px ${color}`;
-    eyeRight.style.backgroundColor = color;
-    eyeRight.style.boxShadow = `0 0 30px ${color}`;
-    glow.style.background = `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`;
-    badge.className = badgeClass;
-    mouth.style.backgroundColor = color;
-    mouth.style.boxShadow = `0 0 10px ${color}`;
-
-    triggerSystemSpeech();
-}
-
-// ----------------------------------------------------
-// BROWSER NATIVE TTS
-// ----------------------------------------------------
-async function triggerSystemSpeech() {
-    try {
-        serverLog("[TRACE TRIGGER] Calling /speak endpoint");
-        const response = await fetch(`${API_BASE}/speak`);
-        const data = await response.json();
-        if (data.text) {
-            serverLog(`[TRACE RESPONSE] Speak: '${data.text}'`);
-            
-            // PRIORITY OVERRIDE
-            speechQueue = []; 
-            if (isSpeaking) {
-                window.speechSynthesis.cancel();
-                isSpeaking = false;
-            }
-            
-            queueSpeech(data.text);
-        }
-    } catch (e) { console.error("Speech trigger failed", e); }
-}
-
-async function sendChatMessage(message) {
-    if (!message.trim()) return;
-    
-    serverLog("[TRACE ANIMATION] Starting thinking animation");
-    document.body.classList.add('robot-thinking');
-    
-    const bubble = document.getElementById('speech-bubble');
-    bubble.innerText = "Thinking...";
-    bubble.style.opacity = 1;
-    
-    try {
-        serverLog(`[TRACE TRIGGER] Calling /chat endpoint with message: '${message}'`);
-        const response = await fetch(`${API_BASE}/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message })
-        });
-        const data = await response.json();
-        
-        document.body.classList.remove('robot-thinking');
-        
-        if (data.text) {
-            serverLog(`[TRACE RESPONSE] Chat: '${data.text}'`);
-            speechQueue = []; 
-            if (isSpeaking) {
-                window.speechSynthesis.cancel();
-            }
-            isSpeaking = false;
-            queueSpeech(data.text);
-        }
-    } catch (e) {
-        document.body.classList.remove('robot-thinking');
-        queueSpeech("My neural link is unstable.");
-    }
-}
-
-function queueSpeech(text) {
-    speechQueue.push(text);
-    processSpeechQueue();
-}
-
-async function processSpeechQueue() {
-    if (isSpeaking || speechQueue.length === 0) return;
-    isSpeaking = true;
-    const text = speechQueue.shift();
-    
-    serverLog(`[TRACE TTS] Native speaking: '${text}'`);
-    const bubble = document.getElementById('speech-bubble');
-    const mouth = document.getElementById('mouth');
-    
-    if (bubble) {
-        bubble.innerText = text;
-        bubble.style.opacity = 1;
-    }
-    if (mouth) mouth.classList.add('speaking');
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Attempt to pick a good voice
-    const voices = window.speechSynthesis.getVoices();
-    const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
-    if (femaleVoice) utterance.voice = femaleVoice;
-    
-    utterance.onend = () => {
-        finishSpeech(mouth, bubble);
-    };
-    
-    utterance.onerror = (e) => {
-        serverLog(`[TRACE TTS] Native Error: ${e.error}`, "ERROR");
-        finishSpeech(mouth, bubble);
-    };
-
-    window.speechSynthesis.speak(utterance);
-}
-
-function finishSpeech(mouth, bubble) {
-    serverLog("[TRACE TTS] Finished speaking.");
-    isSpeaking = false;
-    if (mouth) mouth.classList.remove('speaking');
-    if (bubble && speechQueue.length === 0) {
-        setTimeout(() => {
-            if (!isSpeaking) bubble.style.opacity = 0.5;
-        }, 2000);
-    }
-    processSpeechQueue();
-}
-
-// ----------------------------------------------------
-// BROWSER NATIVE STT
-// ----------------------------------------------------
-async function toggleListening() {
-    if (!recognition) {
-        alert("Speech Recognition not supported in this browser.");
-        return;
-    }
-    if (isListening) {
-        recognition.stop();
+    const clockEl = document.getElementById("clock");
+    if (clockEl)
+      clockEl.innerText = new Date().toLocaleTimeString("en-GB", {
+        hour12: false,
+      });
+    // 🔥 SPEAKING ANIMATION CONTROL
+    if (data.ai_speaking) {
+      robotHead.classList.add("speaking");
     } else {
-        recognition.start();
+      robotHead.classList.remove("speaking");
     }
+
+    // 2. Robot Face Reactivity
+    if (
+      data.status !== lastStatus ||
+      data.is_thinking !== lastThinking ||
+      data.is_speaking !== lastSpeaking
+    ) {
+      updateRobotBehavior(
+        data.status,
+        data.risk_score,
+        data.is_thinking,
+        data.ai_speaking, // 🔥 THIS
+      );
+      if (data.status !== lastStatus) {
+        let logType = "info";
+        if (data.status === "DANGER") logType = "crit";
+        else if (data.status === "CAUTION") logType = "warn";
+        addLog(`Operational State changed to ${data.status}`, logType);
+      }
+
+      lastStatus = data.status;
+      lastThinking = data.is_thinking;
+      lastSpeaking = data.ai_speaking; // ✅ FIXED
+    }
+    // 3. Dynamic Dashboard
+    if (document.getElementById("dynamic-metrics")) {
+      renderDashboard(data);
+    }
+
+    // 4. Speech Updates
+    const speechText = document.getElementById("speech-text");
+    if (speechText && data.ai_response) {
+      if (speechText.innerText !== data.ai_response) {
+        speechText.innerText = data.ai_response;
+        playAndAnimate();
+      }
+    }
+  } catch (e) {
+    console.error("Link Failure:", e);
+  }
 }
 
-
 // ----------------------------------------------------
-// UI BINDINGS
+// ROBOT BEHAVIOR ENGINE
 // ----------------------------------------------------
-document.getElementById('btn-send').addEventListener('click', () => {
-    const input = document.getElementById('chat-input');
-    sendChatMessage(input.value);
-    input.value = "";
-});
+function updateRobotBehavior(status, risk, isThinking, isSpeaking) {
+  const head = document.getElementById("robot-head");
+  if (!head) return;
 
-document.getElementById('chat-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendChatMessage(e.target.value);
-        e.target.value = "";
-    }
-});
+  head.classList.remove("danger", "caution", "thinking");
 
-document.getElementById('btn-listen').addEventListener('click', toggleListening);
+  if (isThinking) head.classList.add("thinking");
 
-document.addEventListener('mousemove', (e) => {
-    const eyes = document.querySelectorAll('.eye');
-    eyes.forEach(eye => {
-        const pupil = eye.querySelector('.pupil');
-        const x = (e.clientX / window.innerWidth) * 15 - 7.5;
-        const y = (e.clientY / window.innerHeight) * 15 - 7.5;
-        pupil.style.transform = `translate(${x}px, ${y}px)`;
+  if (status === "DANGER" || risk > 0.75) {
+    head.classList.add("danger");
+    express("SQUINT");
+  } else if (status === "CAUTION" || risk > 0.4) {
+    head.classList.add("caution");
+    express("ALERT");
+  } else {
+    express("NORMAL");
+  }
+
+  // 🔥 REAL SYNC
+  if (!isSpeaking) {
+    stopMouthAnimation();
+  }
+}
+
+async function playAndAnimate() {
+  const audio = new Audio("/speak_audio");
+
+  const bars = document.querySelectorAll(".spec-bar");
+  const head = document.getElementById("robot-head");
+
+  const src = audioCtx.createMediaElementSource(audio);
+  const analyser = audioCtx.createAnalyser();
+
+  src.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  analyser.fftSize = 64;
+  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  function animate() {
+    analyser.getByteFrequencyData(dataArray);
+
+    bars.forEach((bar, i) => {
+      let v = dataArray[i] / 255;
+      bar.style.height = `${5 + v * 40}px`;
     });
-});
 
-function openDashboard() {
-    window.location.href = "dashboard.html";
+    head.classList.add("speaking");
+
+    if (!audio.paused) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  audio.onplay = () => {
+    audioCtx.resume(); // 🔥 IMPORTANT FIX
+    animate();
+  };
+
+  audio.onended = () => {
+    head.classList.remove("speaking");
+    bars.forEach((b) => (b.style.height = "6px"));
+  };
+
+  audio.play();
 }
 
-setInterval(updateState, 1500); 
+function animateMouth(text) {
+  const bars = document.querySelectorAll(".spec-bar");
+  const head = document.getElementById("robot-head");
+
+  head.classList.add("speaking");
+
+  let duration = Math.max(1500, text.length * 60);
+  let start = Date.now();
+
+  function animate() {
+    let elapsed = Date.now() - start;
+
+    bars.forEach((bar) => {
+      let randomHeight = 5 + Math.random() * 35;
+      bar.style.height = `${randomHeight}px`;
+    });
+
+    if (elapsed < duration) {
+      requestAnimationFrame(animate);
+    } else {
+      // reset
+      bars.forEach((bar) => (bar.style.height = "6px"));
+      head.classList.remove("speaking");
+    }
+  }
+
+  animate();
+}
+
+function startMouthAnimation() {
+  if (mouthAnimating) return;
+
+  const bars = document.querySelectorAll(".spec-bar");
+  const head = document.getElementById("robot-head");
+
+  mouthAnimating = true;
+  head.classList.add("speaking");
+
+  function animate() {
+    if (!mouthAnimating) return;
+
+    bars.forEach((bar) => {
+      bar.style.height = `${5 + Math.random() * 40}px`;
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+function stopMouthAnimation() {
+  const bars = document.querySelectorAll(".spec-bar");
+  const head = document.getElementById("robot-head");
+
+  mouthAnimating = false;
+  head.classList.remove("speaking");
+
+  bars.forEach((bar) => (bar.style.height = "6px"));
+}
+
+function express(mood) {
+  const dots = document.querySelectorAll(".led-dot");
+  dots.forEach((dot) => {
+    if (mood === "SQUINT") {
+      dot.style.height = "10px";
+      dot.style.marginTop = "15px";
+    } else if (mood === "ALERT") {
+      dot.style.height = "45px";
+      dot.style.marginTop = "0px";
+    } else {
+      dot.style.height = "35px";
+      dot.style.marginTop = "0px";
+    }
+  });
+}
+
+// 3D Head Tracking
+document.addEventListener("mousemove", (e) => {
+  const head = document.getElementById("robot-head");
+  if (!head) return;
+
+  const rect = head.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  const rotY = (e.clientX - centerX) / 25;
+  const rotX = -(e.clientY - centerY) / 25;
+
+  const limit = 15;
+  const rY = Math.max(-limit, Math.min(limit, rotY));
+  const rX = Math.max(-limit, Math.min(limit, rotX));
+
+  head.style.transform = `rotateX(${rX}deg) rotateY(${rY}deg)`;
+
+  const eyes = document.querySelectorAll(".led-grid");
+  eyes.forEach((eye) => {
+    eye.style.transform = `translateX(${rY * 0.5}px) translateY(${-rX * 0.5}px)`;
+  });
+});
+
+// ----------------------------------------------------
+// DASHBOARD ENGINE (MISSION CONTROL)
+// ----------------------------------------------------
+function renderDashboard(data) {
+  const container = document.getElementById("dynamic-metrics");
+  if (!container) return;
+
+  const state = data.machine_state || {};
+  let html = "";
+
+  // 1. Dynamic Metric Panels
+  if (state.temperature !== undefined) {
+    html += createCommandPanel(
+      "System Temperature",
+      state.temperature.toFixed(1),
+      "°C",
+      data.status,
+    );
+  }
+  if (state.vibration !== undefined) {
+    html += createCommandPanel(
+      "Structural Vibration",
+      state.vibration.toFixed(2),
+      "mm/s",
+      data.status,
+    );
+  }
+
+  // Add any custom sensors from config
+  const sensors = data.machine_config?.sensors || {};
+  Object.entries(sensors).forEach(([key, cfg]) => {
+    if (key !== "temperature" && key !== "vibration") {
+      html += createCommandPanel(key, state[key] || 0.0, cfg.unit, data.status);
+    }
+  });
+
+  container.innerHTML = html;
+
+  // 2. Risk Probability Visualization
+  const riskFill = document.getElementById("risk-fill");
+  if (riskFill) {
+    const riskVal = (data.risk_score * 100).toFixed(0);
+    riskFill.style.width = `${riskVal}%`;
+    document.getElementById("risk-val-text").innerText =
+      data.risk_score.toFixed(2);
+    document.getElementById("risk-pct-text").innerText = `${riskVal}%`;
+
+    if (data.risk_score > 0.7) riskFill.style.background = "var(--ind-red)";
+    else if (data.risk_score > 0.4)
+      riskFill.style.background = "var(--ind-yellow)";
+    else riskFill.style.background = "var(--ind-blue)";
+  }
+}
+
+function createCommandPanel(title, val, unit, status) {
+  let mode = "";
+  if (status === "DANGER") mode = "danger";
+  else if (status === "CAUTION" || status === "WARNING") mode = "caution";
+
+  return `
+        <div class="metric-panel ${mode}">
+            <div class="m-title">${title.toUpperCase()}</div>
+            <div class="m-main">
+                <span class="m-val">${val}</span>
+                <span class="m-unit">${unit}</span>
+            </div>
+            <div style="font-size: 0.6rem; color: #333; margin-top: 5px; font-family: 'Share Tech Mono'">SENS_ACTIVE_OK</div>
+        </div>
+    `;
+}
+
+function addLog(msg, type = "info") {
+  const container = document.getElementById("event-logs");
+  if (!container) return;
+
+  const entry = document.createElement("div");
+  entry.className = `log-entry ${type}`;
+  const ts = new Date().toLocaleTimeString("en-GB", { hour12: false });
+  entry.innerHTML = `<span class="log-ts">[${ts}]</span> <span class="log-msg">${msg.toUpperCase()}</span>`;
+
+  container.prepend(entry);
+  if (container.children.length > 15) container.lastChild.remove();
+}
+
+// ----------------------------------------------------
+// BOOTSTRAP
+// ----------------------------------------------------
+setInterval(updateState, 500); // 2x faster updates
 updateState();
+addLog("Mission Control Subsystem Online", "info");

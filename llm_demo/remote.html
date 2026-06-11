@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelX AI V5 | Remote</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="remote">
+  <div class="shell remote-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="SentinelX AI home">
+        <span class="brand-mark"></span>
+        <span>SentinelX Remote</span>
+      </a>
+      <span class="system-pill">Operator Mode</span>
+    </header>
+
+    <main class="remote-layout">
+      <section class="glass-panel remote-panel">
+        <div class="panel-kicker">Robot Demo Control</div>
+        <h1>Live Operator Remote</h1>
+        <p>Keep this page hidden from the audience. Use it to drive the robot screen during the demo.</p>
+
+        <div class="remote-actions">
+          <button class="primary-action" data-remote-command="speak" data-intent="status" type="button">
+            <span class="remote-dot"></span>
+            <span>Speak Freely</span>
+          </button>
+          <button class="remote-button listen" data-remote-command="listen" type="button">
+            Start Listening
+          </button>
+          <button class="remote-button end" data-remote-command="end" type="button">
+            End & Answer
+          </button>
+        </div>
+
+        <div class="remote-grid">
+          <button data-remote-command="speak" data-intent="status" type="button">"What is the current status?"</button>
+          <button data-remote-command="speak" data-intent="risk" type="button">"Are there any safety risks?"</button>
+          <button data-remote-command="speak" data-intent="health" type="button">"Machine performance report"</button>
+          <button data-remote-command="speak" data-intent="helmet" type="button">"Analyze current safety issues"</button>
+        </div>
+
+        <label class="remote-select">
+          <span>Answer after End</span>
+          <select id="remoteIntent">
+            <option value="status">Status Update</option>
+            <option value="risk">Risk Alert</option>
+            <option value="health">Machine Health</option>
+            <option value="helmet">Safety Issue</option>
+          </select>
+        </label>
+
+        <div class="response-box">
+          <span class="response-label">Last Command</span>
+          <p id="remoteLog">Ready.</p>
+        </div>
+
+        <div class="response-box remote-origin">
+          <span class="response-label">Connection</span>
+          <p id="remoteOrigin">Checking origin...</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <audio id="clickSound" preload="auto" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+  <audio id="alertSound" preload="auto" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+  <script src="app.js"></script>
+</body>
+</html>
